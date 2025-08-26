@@ -7,6 +7,8 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="config.js"></script>
+    <script src="supabase-service.js"></script>
     <style>
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(20px); }
@@ -54,9 +56,44 @@
         <header class="mb-10 text-center">
             <h1 class="text-4xl font-bold text-indigo-600 mb-2">Trade Journal</h1>
             <p class="text-gray-600">Track your trading performance with multimedia notes</p>
+            
+            <!-- Authentication Section -->
+            <div id="authSection" class="mt-6">
+                <div id="loginForm" class="max-w-md mx-auto bg-white rounded-lg shadow-md p-6">
+                    <h3 class="text-xl font-semibold text-gray-800 mb-4">Sign In</h3>
+                    <form id="authForm" class="space-y-4">
+                        <div>
+                            <label for="email" class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                            <input type="email" id="email" required class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:border-indigo-500 input-focus transition">
+                        </div>
+                        <div>
+                            <label for="password" class="block text-sm font-medium text-gray-700 mb-1">Password</label>
+                            <input type="password" id="password" required class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:border-indigo-500 input-focus transition">
+                        </div>
+                        <button type="submit" class="w-full bg-indigo-600 text-white py-2 rounded-lg font-medium hover:bg-indigo-700 transition">
+                            Sign In
+                        </button>
+                    </form>
+                    <div class="mt-4 text-center">
+                        <button id="toggleAuth" class="text-indigo-600 hover:text-indigo-800 text-sm">
+                            Don't have an account? Sign Up
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- User Info Section (hidden initially) -->
+            <div id="userSection" class="mt-6 hidden">
+                <div class="flex items-center justify-center space-x-4">
+                    <span id="userEmail" class="text-gray-700"></span>
+                    <button id="signOutBtn" class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition">
+                        Sign Out
+                    </button>
+                </div>
+            </div>
         </header>
 
-        <div class="flex flex-col lg:flex-row gap-8">
+        <div id="mainContent" class="flex flex-col lg:flex-row gap-8 hidden">
             <!-- Trade Entry Form -->
             <div class="w-full lg:w-1/3">
                 <div class="glass-effect rounded-xl shadow-lg p-6 sticky top-4">
@@ -104,10 +141,9 @@
                                         <input type="file" id="imageUpload" accept="image/*" class="hidden">
                                     </label>
                                     
-                                    <label for="voiceUpload" class="flex items-center justify-center w-12 h-12 rounded-full bg-amber-100 text-amber-600 cursor-pointer hover:bg-amber-200 transition">
+                                    <button type="button" id="voiceRecordBtn" class="flex items-center justify-center w-12 h-12 rounded-full bg-amber-100 text-amber-600 cursor-pointer hover:bg-amber-200 transition">
                                         <i class="fas fa-microphone"></i>
-                                        <input type="file" id="voiceUpload" accept="audio/*" class="hidden">
-                                    </label>
+                                    </button>
                                     
                                     <label for="videoUpload" class="flex items-center justify-center w-12 h-12 rounded-full bg-emerald-100 text-emerald-600 cursor-pointer hover:bg-emerald-200 transition">
                                         <i class="fas fa-video"></i>
@@ -154,12 +190,124 @@
         </div>
     </div>
 
+    <!-- Edit Trade Modal -->
+    <div id="editModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+        <div class="bg-white rounded-xl shadow-lg p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-2xl font-semibold text-gray-800">Edit Trade</h3>
+                <button onclick="closeEditModal()" class="text-gray-500 hover:text-gray-700">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+            
+            <form id="editTradeForm" class="space-y-4">
+                <input type="hidden" id="editTradeId">
+                
+                <div>
+                    <label for="editTitle" class="block text-sm font-medium text-gray-700 mb-1">Trade Title*</label>
+                    <input type="text" id="editTitle" required class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:border-indigo-500 input-focus transition">
+                </div>
+                
+                <div>
+                    <label for="editDescription" class="block text-sm font-medium text-gray-700 mb-1">Description</label>
+                    <textarea id="editDescription" rows="3" class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:border-indigo-500 input-focus transition"></textarea>
+                </div>
+                
+                <div>
+                    <label for="editSymbol" class="block text-sm font-medium text-gray-700 mb-1">Symbol*</label>
+                    <input type="text" id="editSymbol" required class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:border-indigo-500 input-focus transition">
+                </div>
+                
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label for="editEntryPrice" class="block text-sm font-medium text-gray-700 mb-1">Entry Price*</label>
+                        <input type="number" step="0.01" id="editEntryPrice" required class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:border-indigo-500 input-focus transition">
+                    </div>
+                    <div>
+                        <label for="editExitPrice" class="block text-sm font-medium text-gray-700 mb-1">Exit Price*</label>
+                        <input type="number" step="0.01" id="editExitPrice" required class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:border-indigo-500 input-focus transition">
+                    </div>
+                </div>
+                
+                <div>
+                    <label for="editTradeDate" class="block text-sm font-medium text-gray-700 mb-1">Trade Date</label>
+                    <input type="date" id="editTradeDate" class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:border-indigo-500 input-focus transition">
+                </div>
+                
+                <div class="flex justify-end space-x-3 pt-4">
+                    <button type="button" onclick="closeEditModal()" class="px-4 py-2 text-gray-600 border border-gray-300 rounded-lg hover:bg-gray-50 transition">
+                        Cancel
+                    </button>
+                    <button type="submit" class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition">
+                        Update Trade
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Media Preview Modal -->
+    <div id="mediaPreviewModal" class="fixed inset-0 bg-black bg-opacity-90 flex items-center justify-center z-50 hidden">
+        <div class="relative w-full h-full flex items-center justify-center p-4">
+            <button onclick="closeMediaPreviewModal()" class="absolute top-4 right-4 text-white hover:text-gray-300 z-10">
+                <i class="fas fa-times text-3xl"></i>
+            </button>
+            
+            <div id="mediaPreviewContent" class="max-w-4xl max-h-full overflow-auto">
+                <!-- Media content will be inserted here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Media Modal -->
+    <div id="addMediaModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+        <div class="bg-white rounded-xl shadow-lg p-6 w-full max-w-md">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-xl font-semibold text-gray-800">Add Media to Trade</h3>
+                <button onclick="closeAddMediaModal()" class="text-gray-500 hover:text-gray-700">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+            
+            <form id="addMediaForm" class="space-y-4">
+                <input type="hidden" id="addMediaTradeId">
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-3">Select Media Type</label>
+                    <div class="flex items-center space-x-4">
+                        <label for="addImageUpload" class="flex items-center justify-center w-12 h-12 rounded-full bg-indigo-100 text-indigo-600 cursor-pointer hover:bg-indigo-200 transition">
+                            <i class="fas fa-image"></i>
+                            <input type="file" id="addImageUpload" accept="image/*" class="hidden">
+                        </label>
+                        
+                        <button type="button" id="addVoiceRecordBtn" class="flex items-center justify-center w-12 h-12 rounded-full bg-amber-100 text-amber-600 cursor-pointer hover:bg-amber-200 transition">
+                            <i class="fas fa-microphone"></i>
+                        </button>
+                        
+                        <label for="addVideoUpload" class="flex items-center justify-center w-12 h-12 rounded-full bg-emerald-100 text-emerald-600 cursor-pointer hover:bg-emerald-200 transition">
+                            <i class="fas fa-video"></i>
+                            <input type="file" id="addVideoUpload" accept="video/*" class="hidden">
+                        </label>
+                    </div>
+                </div>
+                
+                <div id="addMediaPreviews" class="space-y-2">
+                    <!-- Media previews will appear here -->
+                </div>
+                
+                                 <div class="flex justify-end space-x-3 pt-4">
+                     <button type="button" onclick="closeAddMediaModal()" class="px-4 py-2 text-gray-600 border border-gray-300 rounded-lg hover:bg-gray-50 transition">
+                         Cancel
+                     </button>
+                     <button type="submit" class="px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition">
+                         Add Media
+                     </button>
+                 </div>
+            </form>
+        </div>
+    </div>
+
     <script>
-        // Supabase Configuration
-        const supabaseUrl = 'https://your-project.supabase.co';
-        const supabaseKey = 'your-supabase-key';
-        const supabase = supabase.createClient(supabaseUrl, supabaseKey);
-        
         // DOM Elements
         const tradeForm = document.getElementById('tradeForm');
         const tradeList = document.getElementById('tradeList');
@@ -167,10 +315,17 @@
         const filterPnl = document.getElementById('filterPnl');
         const filterDate = document.getElementById('filterDate');
         const mediaPreviews = document.getElementById('mediaPreviews');
+        const authSection = document.getElementById('authSection');
+        const userSection = document.getElementById('userSection');
+        const mainContent = document.getElementById('mainContent');
+        const authForm = document.getElementById('authForm');
+        const toggleAuth = document.getElementById('toggleAuth');
+        const signOutBtn = document.getElementById('signOutBtn');
+        const userEmail = document.getElementById('userEmail');
         
         // Media upload elements
         const imageUpload = document.getElementById('imageUpload');
-        const voiceUpload = document.getElementById('voiceUpload');
+        const voiceRecordBtn = document.getElementById('voiceRecordBtn');
         const videoUpload = document.getElementById('videoUpload');
         
         // Store media files before upload
@@ -180,68 +335,92 @@
             video: null
         };
         
-        // Sample data for demonstration
-        const sampleTrades = [
-            {
-                id: '1',
-                title: 'Successful AAPL Trade',
-                description: 'Bought at support, sold at resistance',
-                symbol: 'AAPL',
-                entry_price: 145.50,
-                exit_price: 152.75,
-                pnl: 725.00,
-                trade_date: '2023-05-15',
-                created_at: '2023-05-15T10:30:00',
-                image_url: 'https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=500&q=80',
-                voice_url: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3',
-                video_url: null
-            },
-            {
-                id: '2',
-                title: 'TSLA Short',
-                description: 'Short at resistance with high volume',
-                symbol: 'TSLA',
-                entry_price: 280.00,
-                exit_price: 265.50,
-                pnl: 1450.00,
-                trade_date: '2023-05-18',
-                created_at: '2023-05-18T14:45:00',
-                image_url: 'https://images.unsplash.com/photo-1636466497217-26a8cbeaf0aa?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=500&q=80',
-                voice_url: null,
-                video_url: 'https://samplelib.com/lib/preview/mp4/sample-5s.mp4'
-            },
-            {
-                id: '3',
-                title: 'Failed NVDA Trade',
-                description: 'Missed earnings reaction',
-                symbol: 'NVDA',
-                entry_price: 305.00,
-                exit_price: 295.25,
-                pnl: -975.00,
-                trade_date: '2023-05-20',
-                created_at: '2023-05-20T09:15:00',
-                image_url: null,
-                voice_url: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3',
-                video_url: null
-            }
-        ];
+        // Voice recording variables
+        let mediaRecorder = null;
+        let audioChunks = [];
+        let isRecording = false;
+        
+        // Authentication state
+        let isSignUp = false;
+        let allTrades = [];
         
         // Initialize the app
-        document.addEventListener('DOMContentLoaded', () => {
+        document.addEventListener('DOMContentLoaded', async () => {
             // Set default date to today
             const today = new Date().toISOString().split('T')[0];
             document.getElementById('tradeDate').value = today;
             filterDate.value = '';
             
-            // Load sample trades (in a real app, this would fetch from Supabase)
-            renderTrades(sampleTrades);
+            // Check if user is already authenticated
+            const user = await supabaseService.getCurrentUser();
+            if (user) {
+                showAuthenticatedUI(user);
+                await loadTrades();
+            } else {
+                showAuthUI();
+            }
             
             // Setup event listeners
             setupEventListeners();
         });
         
         function setupEventListeners() {
-            // Form submission
+            // Authentication form submission
+            authForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                
+                const email = document.getElementById('email').value;
+                const password = document.getElementById('password').value;
+                
+                try {
+                    let result;
+                    if (isSignUp) {
+                        result = await supabaseService.signUp(email, password);
+                    } else {
+                        result = await supabaseService.signIn(email, password);
+                    }
+                    
+                    if (result.success) {
+                        const user = await supabaseService.getCurrentUser();
+                        showAuthenticatedUI(user);
+                        await loadTrades();
+                    } else {
+                        alert(result.error);
+                    }
+                } catch (error) {
+                    console.error('Authentication error:', error);
+                    alert('Authentication failed');
+                }
+            });
+            
+            // Toggle between sign in and sign up
+            toggleAuth.addEventListener('click', () => {
+                isSignUp = !isSignUp;
+                const submitBtn = authForm.querySelector('button[type="submit"]');
+                const toggleBtn = document.getElementById('toggleAuth');
+                
+                if (isSignUp) {
+                    submitBtn.textContent = 'Sign Up';
+                    toggleBtn.textContent = 'Already have an account? Sign In';
+                } else {
+                    submitBtn.textContent = 'Sign In';
+                    toggleBtn.textContent = 'Don\'t have an account? Sign Up';
+                }
+            });
+            
+            // Sign out
+            signOutBtn.addEventListener('click', async () => {
+                try {
+                    await supabaseService.signOut();
+                    showAuthUI();
+                    allTrades = [];
+                    renderTrades([]);
+                } catch (error) {
+                    console.error('Sign out error:', error);
+                }
+            });
+            
+            // Trade form submission
             tradeForm.addEventListener('submit', async (e) => {
                 e.preventDefault();
                 
@@ -261,65 +440,68 @@
                         return;
                     }
                     
-                    // Generate a unique ID for the trade (in a real app, this would come from Supabase)
-                    const tradeId = generateUUID();
-                    
-                    // Upload media files and get URLs
-                    let imageUrl = null;
-                    let voiceUrl = null;
-                    let videoUrl = null;
-                    
-                    if (mediaFiles.image) {
-                        // In a real app, upload to Supabase storage
-                        // imageUrl = await uploadMedia(tradeId, 'image', mediaFiles.image);
-                        imageUrl = `https://example.com/trade_media/${tradeId}/image.jpg`; // Simulated URL
-                    }
-                    
-                    if (mediaFiles.voice) {
-                        // voiceUrl = await uploadMedia(tradeId, 'voice', mediaFiles.voice);
-                        voiceUrl = `https://example.com/trade_media/${tradeId}/voice.mp3`; // Simulated URL
-                    }
-                    
-                    if (mediaFiles.video) {
-                        // videoUrl = await uploadMedia(tradeId, 'video', mediaFiles.video);
-                        videoUrl = `https://example.com/trade_media/${tradeId}/video.mp4`; // Simulated URL
-                    }
-                    
                     // Create trade object
-                    const newTrade = {
-                        id: tradeId,
+                    const tradeData = {
                         title,
                         description,
                         symbol,
                         entry_price: entryPrice,
                         exit_price: exitPrice,
                         pnl,
-                        trade_date: tradeDate,
-                        created_at: new Date().toISOString(),
-                        image_url: imageUrl,
-                        voice_url: voiceUrl,
-                        video_url: videoUrl
+                        trade_date: tradeDate
                     };
                     
-                    // In a real app, insert into Supabase
-                    // const { data, error } = await supabase
-                    //     .from('trades')
-                    //     .insert([newTrade]);
+                    // Create trade in Supabase
+                    const result = await supabaseService.createTrade(tradeData);
                     
-                    // For demo, add to sample trades
-                    sampleTrades.unshift(newTrade);
-                    
-                    // Clear form
-                    tradeForm.reset();
-                    document.getElementById('tradeDate').value = today;
-                    mediaPreviews.innerHTML = '';
-                    mediaFiles = { image: null, voice: null, video: null };
-                    
-                    // Refresh trade list
-                    renderTrades(sampleTrades);
-                    
-                    // Show success message
-                    alert('Trade saved successfully!');
+                    if (result.success) {
+                        const newTrade = result.data;
+                        
+                                                 // Upload media files if any
+                         if (mediaFiles.image) {
+                             const imageResult = await supabaseService.uploadFile(mediaFiles.image, newTrade.id, 'image');
+                             if (imageResult.success) {
+                                 await supabaseService.updateTrade(newTrade.id, { image_urls: [imageResult.url] });
+                             }
+                         }
+                         
+                         if (mediaFiles.voice) {
+                             const voiceResult = await supabaseService.uploadFile(mediaFiles.voice, newTrade.id, 'voice');
+                             if (voiceResult.success) {
+                                 await supabaseService.updateTrade(newTrade.id, { voice_urls: [voiceResult.url] });
+                             }
+                         }
+                         
+                         if (mediaFiles.video) {
+                             const videoResult = await supabaseService.uploadFile(mediaFiles.video, newTrade.id, 'video');
+                             if (videoResult.success) {
+                                 await supabaseService.updateTrade(newTrade.id, { video_urls: [videoResult.url] });
+                             }
+                         }
+                        
+                        // Clear form
+                        tradeForm.reset();
+                        document.getElementById('tradeDate').value = new Date().toISOString().split('T')[0];
+                        mediaPreviews.innerHTML = '';
+                        mediaFiles = { image: null, voice: null, video: null };
+                        
+                        // Reset voice recording button
+                        if (isRecording && mediaRecorder && mediaRecorder.state !== 'inactive') {
+                            mediaRecorder.stop();
+                            isRecording = false;
+                        }
+                        voiceRecordBtn.innerHTML = '<i class="fas fa-microphone"></i>';
+                        voiceRecordBtn.classList.remove('bg-red-100', 'text-red-600', 'hover:bg-red-200');
+                        voiceRecordBtn.classList.add('bg-amber-100', 'text-amber-600', 'hover:bg-amber-200');
+                        
+                        // Reload trades
+                        await loadTrades();
+                        
+                        // Show success message
+                        alert('Trade saved successfully!');
+                    } else {
+                        alert(result.error);
+                    }
                     
                 } catch (error) {
                     console.error('Error saving trade:', error);
@@ -329,13 +511,323 @@
             
             // Media upload handlers
             imageUpload.addEventListener('change', (e) => handleMediaUpload(e, 'image'));
-            voiceUpload.addEventListener('change', (e) => handleMediaUpload(e, 'voice'));
+            voiceRecordBtn.addEventListener('click', handleVoiceRecording);
             videoUpload.addEventListener('change', (e) => handleMediaUpload(e, 'video'));
             
             // Search and filter handlers
             searchInput.addEventListener('input', () => filterTrades());
             filterPnl.addEventListener('change', () => filterTrades());
             filterDate.addEventListener('change', () => filterTrades());
+            
+            // Edit trade form submission
+            document.getElementById('editTradeForm').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                
+                try {
+                    const tradeId = document.getElementById('editTradeId').value;
+                    const title = document.getElementById('editTitle').value;
+                    const description = document.getElementById('editDescription').value;
+                    const symbol = document.getElementById('editSymbol').value.toUpperCase();
+                    const entryPrice = parseFloat(document.getElementById('editEntryPrice').value);
+                    const exitPrice = parseFloat(document.getElementById('editExitPrice').value);
+                    const tradeDate = document.getElementById('editTradeDate').value;
+                    const pnl = exitPrice - entryPrice;
+                    
+                    // Validate required fields
+                    if (!title || !symbol || isNaN(entryPrice) || isNaN(exitPrice)) {
+                        alert('Please fill in all required fields');
+                        return;
+                    }
+                    
+                    const updates = {
+                        title,
+                        description,
+                        symbol,
+                        entry_price: entryPrice,
+                        exit_price: exitPrice,
+                        pnl,
+                        trade_date: tradeDate
+                    };
+                    
+                    const result = await supabaseService.updateTrade(tradeId, updates);
+                    
+                    if (result.success) {
+                        closeEditModal();
+                        await loadTrades();
+                        alert('Trade updated successfully!');
+                    } else {
+                        alert(result.error);
+                    }
+                    
+                } catch (error) {
+                    console.error('Error updating trade:', error);
+                    alert('An error occurred while updating the trade');
+                }
+            });
+            
+                         // Add media form submission
+             document.getElementById('addMediaForm').addEventListener('submit', async (e) => {
+                 e.preventDefault();
+                 
+                 try {
+                     const tradeId = document.getElementById('addMediaTradeId').value;
+                     let hasMedia = false;
+                     
+                     // Debug: Log the current state of addMediaFiles
+                     console.log('addMediaFiles state:', addMediaFiles);
+                     console.log('addMediaFiles.image:', addMediaFiles.image);
+                     console.log('addMediaFiles.voice:', addMediaFiles.voice);
+                     console.log('addMediaFiles.video:', addMediaFiles.video);
+                     
+                     // Upload media files if any
+                     if (addMediaFiles.image) {
+                         console.log('Processing image file:', addMediaFiles.image);
+                         const imageResult = await supabaseService.addMediaToTrade(tradeId, addMediaFiles.image, 'image');
+                         console.log('Image upload result:', imageResult);
+                         if (imageResult.success) {
+                             hasMedia = true;
+                         }
+                     }
+                     
+                     if (addMediaFiles.voice) {
+                         console.log('Processing voice file:', addMediaFiles.voice);
+                         const voiceResult = await supabaseService.addMediaToTrade(tradeId, addMediaFiles.voice, 'voice');
+                         console.log('Voice upload result:', voiceResult);
+                         if (voiceResult.success) {
+                             hasMedia = true;
+                         }
+                     }
+                     
+                     if (addMediaFiles.video) {
+                         console.log('Processing video file:', addMediaFiles.video);
+                         const videoResult = await supabaseService.addMediaToTrade(tradeId, addMediaFiles.video, 'video');
+                         console.log('Video upload result:', videoResult);
+                         if (videoResult.success) {
+                             hasMedia = true;
+                         }
+                     }
+                     
+                     console.log('Final hasMedia value:', hasMedia);
+                     
+                     if (hasMedia) {
+                         closeAddMediaModal();
+                         await loadTrades();
+                         alert('Media added successfully!');
+                     } else {
+                         alert('Please select at least one media file');
+                     }
+                     
+                 } catch (error) {
+                     console.error('Error adding media:', error);
+                     alert('An error occurred while adding media');
+                 }
+             });
+            
+                         // Add media upload handlers
+             document.getElementById('addImageUpload').addEventListener('change', (e) => {
+                 console.log('addImageUpload change event triggered');
+                 handleAddMediaUpload(e, 'image');
+             });
+             document.getElementById('addVideoUpload').addEventListener('change', (e) => {
+                 console.log('addVideoUpload change event triggered');
+                 handleAddMediaUpload(e, 'video');
+             });
+             document.getElementById('addVoiceRecordBtn').addEventListener('click', handleAddVoiceRecording);
+        }
+        
+        async function handleVoiceRecording() {
+            if (!isRecording) {
+                // Start recording
+                try {
+                    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                    mediaRecorder = new MediaRecorder(stream);
+                    audioChunks = [];
+                    
+                    mediaRecorder.ondataavailable = (event) => {
+                        audioChunks.push(event.data);
+                    };
+                    
+                    mediaRecorder.onstop = () => {
+                        const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
+                        mediaFiles.voice = audioBlob;
+                        
+                        // Create audio preview
+                        const audioUrl = URL.createObjectURL(audioBlob);
+                        createVoicePreview(audioUrl);
+                        
+                        // Stop all tracks
+                        stream.getTracks().forEach(track => track.stop());
+                    };
+                    
+                    mediaRecorder.start();
+                    isRecording = true;
+                    
+                    // Update button appearance
+                    voiceRecordBtn.innerHTML = '<i class="fas fa-stop"></i>';
+                    voiceRecordBtn.classList.remove('bg-amber-100', 'text-amber-600', 'hover:bg-amber-200');
+                    voiceRecordBtn.classList.add('bg-red-100', 'text-red-600', 'hover:bg-red-200');
+                    
+                } catch (error) {
+                    console.error('Error accessing microphone:', error);
+                    alert('Unable to access microphone. Please check permissions.');
+                }
+            } else {
+                // Stop recording
+                if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+                    mediaRecorder.stop();
+                    isRecording = false;
+                    
+                    // Reset button appearance
+                    voiceRecordBtn.innerHTML = '<i class="fas fa-microphone"></i>';
+                    voiceRecordBtn.classList.remove('bg-red-100', 'text-red-600', 'hover:bg-red-200');
+                    voiceRecordBtn.classList.add('bg-amber-100', 'text-amber-600', 'hover:bg-amber-200');
+                }
+            }
+        }
+        
+        function createVoicePreview(audioUrl) {
+            // Remove existing voice preview
+            const existingPreview = document.getElementById('voice-preview');
+            if (existingPreview) {
+                existingPreview.remove();
+            }
+            
+            const previewElement = document.createElement('div');
+            previewElement.id = 'voice-preview';
+            previewElement.className = 'media-preview w-full h-24 rounded-lg border border-gray-200 bg-amber-50 p-3 flex items-center cursor-pointer';
+            previewElement.onclick = () => previewMedia('voice', audioUrl, 'Voice Note Preview');
+            previewElement.innerHTML = `
+                <div class="flex items-center justify-between w-full">
+                    <audio controls class="flex-1" onclick="event.stopPropagation()">
+                        <source src="${audioUrl}" type="audio/wav">
+                        Your browser does not support the audio element.
+                    </audio>
+                    <i class="fas fa-expand text-amber-600 ml-2"></i>
+                </div>
+            `;
+            
+            mediaPreviews.appendChild(previewElement);
+        }
+        
+        // Add Media Helper Functions
+        function handleAddMediaUpload(event, type) {
+            const file = event.target.files[0];
+            if (!file) return;
+            
+            console.log(`handleAddMediaUpload called for type: ${type}`);
+            console.log('File object:', file);
+            
+            addMediaFiles[type] = file;
+            console.log(`addMediaFiles.${type} set to:`, addMediaFiles[type]);
+            console.log('Current addMediaFiles state:', addMediaFiles);
+            
+            // Create preview
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                // Remove existing preview of this type
+                const existingPreview = document.getElementById(`add-${type}-preview`);
+                if (existingPreview) {
+                    existingPreview.remove();
+                }
+                
+                let previewElement;
+                
+                if (type === 'image') {
+                    previewElement = document.createElement('img');
+                    previewElement.src = e.target.result;
+                    previewElement.alt = 'Image preview';
+                    previewElement.className = 'w-full h-32 object-cover rounded-lg border border-gray-200';
+                } else if (type === 'video') {
+                    previewElement = document.createElement('video');
+                    previewElement.src = e.target.result;
+                    previewElement.controls = true;
+                    previewElement.className = 'w-full h-32 object-cover rounded-lg border border-gray-200';
+                }
+                
+                previewElement.id = `add-${type}-preview`;
+                
+                document.getElementById('addMediaPreviews').appendChild(previewElement);
+            };
+            
+            if (type === 'image' || type === 'video') {
+                reader.readAsDataURL(file);
+            }
+        }
+        
+        async function handleAddVoiceRecording() {
+            if (!isAddRecording) {
+                // Start recording
+                try {
+                    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                    addMediaRecorder = new MediaRecorder(stream);
+                    addAudioChunks = [];
+                    
+                    addMediaRecorder.ondataavailable = (event) => {
+                        addAudioChunks.push(event.data);
+                    };
+                    
+                    addMediaRecorder.onstop = () => {
+                        const audioBlob = new Blob(addAudioChunks, { type: 'audio/wav' });
+                        addMediaFiles.voice = audioBlob;
+                        
+                        // Create audio preview
+                        const audioUrl = URL.createObjectURL(audioBlob);
+                        createAddVoicePreview(audioUrl);
+                        
+                        // Stop all tracks
+                        stream.getTracks().forEach(track => track.stop());
+                    };
+                    
+                    addMediaRecorder.start();
+                    isAddRecording = true;
+                    
+                    // Update button appearance
+                    const addVoiceRecordBtn = document.getElementById('addVoiceRecordBtn');
+                    addVoiceRecordBtn.innerHTML = '<i class="fas fa-stop"></i>';
+                    addVoiceRecordBtn.classList.remove('bg-amber-100', 'text-amber-600', 'hover:bg-amber-200');
+                    addVoiceRecordBtn.classList.add('bg-red-100', 'text-red-600', 'hover:bg-red-200');
+                    
+                } catch (error) {
+                    console.error('Error accessing microphone:', error);
+                    alert('Unable to access microphone. Please check permissions.');
+                }
+            } else {
+                // Stop recording
+                if (addMediaRecorder && addMediaRecorder.state !== 'inactive') {
+                    addMediaRecorder.stop();
+                    isAddRecording = false;
+                    
+                    // Reset button appearance
+                    const addVoiceRecordBtn = document.getElementById('addVoiceRecordBtn');
+                    addVoiceRecordBtn.innerHTML = '<i class="fas fa-microphone"></i>';
+                    addVoiceRecordBtn.classList.remove('bg-red-100', 'text-red-600', 'hover:bg-red-200');
+                    addVoiceRecordBtn.classList.add('bg-amber-100', 'text-amber-600', 'hover:bg-amber-200');
+                }
+            }
+        }
+        
+        function createAddVoicePreview(audioUrl) {
+            // Remove existing voice preview
+            const existingPreview = document.getElementById('add-voice-preview');
+            if (existingPreview) {
+                existingPreview.remove();
+            }
+            
+            const previewElement = document.createElement('div');
+            previewElement.id = 'add-voice-preview';
+            previewElement.className = 'bg-amber-50 p-3 rounded-lg border border-amber-100 w-full';
+            previewElement.innerHTML = `
+                <div class="flex items-center space-x-2 mb-2">
+                    <i class="fas fa-microphone text-amber-600"></i>
+                    <span class="text-sm font-medium text-amber-800">Voice Note</span>
+                </div>
+                <audio controls class="w-full">
+                    <source src="${audioUrl}" type="audio/wav">
+                    Your browser does not support the audio element.
+                </audio>
+            `;
+            
+            document.getElementById('addMediaPreviews').appendChild(previewElement);
         }
         
         function handleMediaUpload(event, type) {
@@ -356,56 +848,72 @@
                 let previewElement;
                 
                 if (type === 'image') {
-                    previewElement = document.createElement('img');
-                    previewElement.src = e.target.result;
-                    previewElement.alt = 'Image preview';
-                } else if (type === 'voice') {
                     previewElement = document.createElement('div');
-                    previewElement.className = 'flex items-center justify-center bg-amber-100 rounded-lg p-2';
+                    previewElement.className = 'relative cursor-pointer';
+                    previewElement.onclick = () => previewMedia('image', e.target.result, 'Image Preview');
                     previewElement.innerHTML = `
-                        <i class="fas fa-microphone text-amber-600 mr-2"></i>
-                        <span class="text-sm text-amber-800">${file.name}</span>
+                        <img src="${e.target.result}" alt="Image preview" class="media-preview w-full h-24 object-cover rounded-lg border border-gray-200">
+                        <div class="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center opacity-0 hover:opacity-100 transition rounded-lg">
+                            <i class="fas fa-expand text-white"></i>
+                        </div>
                     `;
                 } else if (type === 'video') {
-                    previewElement = document.createElement('video');
-                    previewElement.src = e.target.result;
-                    previewElement.controls = true;
+                    previewElement = document.createElement('div');
+                    previewElement.className = 'relative cursor-pointer';
+                    previewElement.onclick = () => previewMedia('video', e.target.result, 'Video Preview');
+                    previewElement.innerHTML = `
+                        <video controls class="media-preview w-full h-24 object-cover rounded-lg border border-gray-200" onclick="event.stopPropagation()">
+                            <source src="${e.target.result}" type="video/mp4">
+                        </video>
+                        <div class="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center opacity-0 hover:opacity-100 transition rounded-lg pointer-events-none">
+                            <i class="fas fa-expand text-white"></i>
+                        </div>
+                    `;
                 }
                 
                 previewElement.id = `${type}-preview`;
-                previewElement.className += ' media-preview w-full h-24 object-cover rounded-lg border border-gray-200';
                 
                 mediaPreviews.appendChild(previewElement);
             };
             
             if (type === 'image' || type === 'video') {
                 reader.readAsDataURL(file);
-            } else {
-                reader.readAsText(file); // For audio, we just show the file name
             }
         }
         
-        async function uploadMedia(tradeId, type, file) {
-            // In a real implementation, this would upload to Supabase storage
-            const filePath = `trade_media/${tradeId}/${type}.${file.name.split('.').pop()}`;
-            
-            // const { data, error } = await supabase
-            //     .storage
-            //     .from('trade_media')
-            //     .upload(filePath, file);
-            
-            // if (error) throw error;
-            
-            // Get public URL
-            // const { data: { publicUrl } } = supabase
-            //     .storage
-            //     .from('trade_media')
-            //     .getPublicUrl(filePath);
-            
-            // return publicUrl;
-            
-            // For demo, return a simulated URL
-            return `https://example.com/${filePath}`;
+
+        
+        // Authentication UI functions
+        function showAuthUI() {
+            authSection.classList.remove('hidden');
+            userSection.classList.add('hidden');
+            mainContent.classList.add('hidden');
+        }
+        
+        function showAuthenticatedUI(user) {
+            authSection.classList.add('hidden');
+            userSection.classList.remove('hidden');
+            mainContent.classList.remove('hidden');
+            userEmail.textContent = user.email;
+        }
+        
+        // Load trades from Supabase
+        async function loadTrades() {
+            try {
+                const result = await supabaseService.getTrades();
+                if (result.success) {
+                    allTrades = result.data;
+                    renderTrades(allTrades);
+                } else {
+                    console.error('Error loading trades:', result.error);
+                    allTrades = [];
+                    renderTrades([]);
+                }
+            } catch (error) {
+                console.error('Error loading trades:', error);
+                allTrades = [];
+                renderTrades([]);
+            }
         }
         
         function filterTrades() {
@@ -413,7 +921,7 @@
             const pnlFilter = filterPnl.value;
             const dateFilter = filterDate.value;
             
-            let filtered = [...sampleTrades];
+            let filtered = [...allTrades];
             
             if (searchTerm) {
                 filtered = filtered.filter(trade => 
@@ -497,6 +1005,22 @@
                         </div>
                         
                         ${renderMediaSection(trade)}
+                        
+                        <!-- Edit and Add Media Buttons -->
+                        <div class="mt-4 flex justify-end space-x-2">
+                            <button onclick="addMediaToTrade('${trade.id}')" class="bg-emerald-600 text-white px-3 py-1 rounded-lg text-sm hover:bg-emerald-700 transition flex items-center space-x-1">
+                                <i class="fas fa-plus"></i>
+                                <span>Add Media</span>
+                            </button>
+                            <button onclick="editTrade('${trade.id}')" class="bg-indigo-600 text-white px-3 py-1 rounded-lg text-sm hover:bg-indigo-700 transition flex items-center space-x-1">
+                                <i class="fas fa-edit"></i>
+                                <span>Edit</span>
+                            </button>
+                            <button onclick="deleteTrade('${trade.id}')" class="bg-red-600 text-white px-3 py-1 rounded-lg text-sm hover:bg-red-700 transition flex items-center space-x-1">
+                                <i class="fas fa-trash"></i>
+                                <span>Delete</span>
+                            </button>
+                        </div>
                     </div>
                 `;
                 
@@ -507,46 +1031,271 @@
         function renderMediaSection(trade) {
             let mediaHtml = '';
             
-            if (trade.image_url || trade.voice_url || trade.video_url) {
-                mediaHtml += '<div class="mt-4"><h4 class="text-sm font-medium text-gray-700 mb-2">Trade Media</h4><div class="flex flex-wrap gap-3">';
+                         // Collect all media URLs
+             const mediaItems = [];
+             
+             // Handle new array-based schema
+             if (trade.image_urls && Array.isArray(trade.image_urls) && trade.image_urls.length > 0) {
+                 trade.image_urls.forEach(url => mediaItems.push({ type: 'image', url, title: trade.title }));
+             }
+             // Fallback for old single URL schema
+             else if (trade.image_url) {
+                 mediaItems.push({ type: 'image', url: trade.image_url, title: trade.title });
+             }
+             
+             if (trade.voice_urls && Array.isArray(trade.voice_urls) && trade.voice_urls.length > 0) {
+                 trade.voice_urls.forEach(url => mediaItems.push({ type: 'voice', url, title: trade.title }));
+             }
+             // Fallback for old single URL schema
+             else if (trade.voice_url) {
+                 mediaItems.push({ type: 'voice', url: trade.voice_url, title: trade.title });
+             }
+             
+             if (trade.video_urls && Array.isArray(trade.video_urls) && trade.video_urls.length > 0) {
+                 trade.video_urls.forEach(url => mediaItems.push({ type: 'video', url, title: trade.title }));
+             }
+             // Fallback for old single URL schema
+             else if (trade.video_url) {
+                 mediaItems.push({ type: 'video', url: trade.video_url, title: trade.title });
+             }
+            
+            if (mediaItems.length > 0) {
+                mediaHtml += '<div class="mt-4"><h4 class="text-sm font-medium text-gray-700 mb-3">Trade Media</h4>';
                 
-                if (trade.image_url) {
-                    mediaHtml += `
-                        <div class="relative group">
-                            <img src="${trade.image_url}" alt="Trade image" class="w-24 h-24 object-cover rounded-lg border border-gray-200 media-preview">
+                // Group media by type
+                const mediaGroups = {};
+                mediaItems.forEach(item => {
+                    if (!mediaGroups[item.type]) {
+                        mediaGroups[item.type] = [];
+                    }
+                    mediaGroups[item.type].push(item);
+                });
+                
+                // Render each media type group
+                Object.keys(mediaGroups).forEach(mediaType => {
+                    const items = mediaGroups[mediaType];
+                    
+                    if (items.length === 1) {
+                        // Single item - full width
+                        mediaHtml += renderSingleMediaItem(items[0]);
+                    } else if (items.length === 2) {
+                        // Two items - side by side
+                        mediaHtml += '<div class="flex space-x-3 mb-3">';
+                        items.forEach(item => {
+                            mediaHtml += `<div class="flex-1">${renderSingleMediaItem(item, true)}</div>`;
+                        });
+                        mediaHtml += '</div>';
+                    } else {
+                        // More than 2 items - horizontal scroll
+                        mediaHtml += '<div class="flex space-x-3 mb-3 overflow-x-auto pb-2">';
+                        items.forEach(item => {
+                            mediaHtml += `<div class="flex-shrink-0 w-80">${renderSingleMediaItem(item, true)}</div>`;
+                        });
+                        mediaHtml += '</div>';
+                    }
+                });
+                
+                mediaHtml += '</div>';
+            }
+            
+            return mediaHtml;
+        }
+        
+        function renderSingleMediaItem(item, isCompact = false) {
+            const height = isCompact ? 'h-48' : 'h-64';
+            
+            switch (item.type) {
+                case 'image':
+                    return `
+                        <div class="relative group w-full cursor-pointer" onclick="previewMedia('image', '${item.url}', '${item.title}')">
+                            <img src="${item.url}" alt="Trade image" class="w-full ${height} object-cover rounded-lg border border-gray-200 media-preview">
                             <div class="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition rounded-lg">
-                                <i class="fas fa-expand text-white"></i>
+                                <i class="fas fa-expand text-white text-2xl"></i>
                             </div>
                         </div>
                     `;
-                }
-                
-                if (trade.voice_url) {
-                    mediaHtml += `
-                        <div class="bg-amber-50 p-3 rounded-lg border border-amber-100 w-full max-w-md">
-                            <audio controls class="w-full">
-                                <source src="${trade.voice_url}" type="audio/mpeg">
+                    
+                case 'voice':
+                    return `
+                        <div class="bg-amber-50 p-4 rounded-lg border border-amber-100 w-full cursor-pointer" onclick="previewMedia('voice', '${item.url}', '${item.title}')">
+                            <div class="flex items-center justify-between mb-2">
+                                <div class="flex items-center space-x-2">
+                                    <i class="fas fa-microphone text-amber-600"></i>
+                                    <span class="text-sm font-medium text-amber-800">Voice Note</span>
+                                </div>
+                                <i class="fas fa-expand text-amber-600 hover:text-amber-800 transition"></i>
+                            </div>
+                            <audio controls class="w-full" onclick="event.stopPropagation()">
+                                <source src="${item.url}" type="audio/wav">
                                 Your browser does not support the audio element.
                             </audio>
                         </div>
                     `;
+                    
+                case 'video':
+                    return `
+                        <div class="relative group w-full cursor-pointer" onclick="previewMedia('video', '${item.url}', '${item.title}')">
+                            <video controls class="w-full ${height} object-cover rounded-lg border border-gray-200 media-preview" onclick="event.stopPropagation()">
+                                <source src="${item.url}" type="video/mp4">
+                                Your browser does not support the video tag.
+                            </video>
+                            <div class="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition rounded-lg pointer-events-none">
+                                <i class="fas fa-expand text-white text-2xl"></i>
+                            </div>
+                        </div>
+                    `;
+                    
+                default:
+                    return '';
+            }
+        }
+        
+        // Edit Trade Functions
+        function editTrade(tradeId) {
+            const trade = allTrades.find(t => t.id === tradeId);
+            if (!trade) return;
+            
+            // Populate edit form
+            document.getElementById('editTradeId').value = trade.id;
+            document.getElementById('editTitle').value = trade.title;
+            document.getElementById('editDescription').value = trade.description || '';
+            document.getElementById('editSymbol').value = trade.symbol;
+            document.getElementById('editEntryPrice').value = trade.entry_price;
+            document.getElementById('editExitPrice').value = trade.exit_price;
+            document.getElementById('editTradeDate').value = trade.trade_date;
+            
+            // Show modal
+            document.getElementById('editModal').classList.remove('hidden');
+        }
+        
+        function closeEditModal() {
+            document.getElementById('editModal').classList.add('hidden');
+            document.getElementById('editTradeForm').reset();
+        }
+        
+        // Delete Trade Function
+        async function deleteTrade(tradeId) {
+            if (!confirm('Are you sure you want to delete this trade? This action cannot be undone.')) {
+                return;
+            }
+            
+            try {
+                const result = await supabaseService.deleteTrade(tradeId);
+                if (result.success) {
+                    await loadTrades();
+                    alert('Trade deleted successfully!');
+                } else {
+                    alert(result.error);
                 }
-                
-                if (trade.video_url) {
-                    mediaHtml += `
-                        <div class="relative group w-full">
-                            <video controls class="w-full rounded-lg border border-gray-200 media-preview">
-                                <source src="${trade.video_url}" type="video/mp4">
+            } catch (error) {
+                console.error('Error deleting trade:', error);
+                alert('An error occurred while deleting the trade');
+            }
+        }
+        
+        // Add Media Functions
+        function addMediaToTrade(tradeId) {
+            console.log('addMediaToTrade called with tradeId:', tradeId);
+            console.log('addMediaFiles before opening modal:', addMediaFiles);
+            
+            document.getElementById('addMediaTradeId').value = tradeId;
+            document.getElementById('addMediaModal').classList.remove('hidden');
+            
+            // Don't reset media files when opening modal - only reset previews
+            document.getElementById('addMediaPreviews').innerHTML = '';
+            
+            // Reset voice recording button
+            const addVoiceRecordBtn = document.getElementById('addVoiceRecordBtn');
+            addVoiceRecordBtn.innerHTML = '<i class="fas fa-microphone"></i>';
+            addVoiceRecordBtn.classList.remove('bg-red-100', 'text-red-600', 'hover:bg-red-200');
+            addVoiceRecordBtn.classList.add('bg-amber-100', 'text-amber-600', 'hover:bg-amber-200');
+        }
+        
+        function closeAddMediaModal() {
+            document.getElementById('addMediaModal').classList.add('hidden');
+            document.getElementById('addMediaForm').reset();
+            document.getElementById('addMediaPreviews').innerHTML = '';
+            
+            // Reset media files when closing modal
+            addMediaFiles = { image: null, voice: null, video: null };
+            console.log('addMediaFiles reset when closing modal:', addMediaFiles);
+            
+            // Stop recording if active
+            if (addMediaRecorder && addMediaRecorder.state !== 'inactive') {
+                addMediaRecorder.stop();
+            }
+        }
+        
+        // Variables for add media functionality
+        let addMediaFiles = { image: null, voice: null, video: null };
+        let addMediaRecorder = null;
+        let addAudioChunks = [];
+        let isAddRecording = false;
+        
+        // Media Preview Functions
+        function previewMedia(type, url, title) {
+            const modal = document.getElementById('mediaPreviewModal');
+            const content = document.getElementById('mediaPreviewContent');
+            
+            let mediaHtml = '';
+            
+            switch (type) {
+                case 'image':
+                    mediaHtml = `
+                        <div class="text-center">
+                            <h3 class="text-white text-xl font-semibold mb-4">${title}</h3>
+                            <img src="${url}" alt="${title}" class="max-w-full max-h-[80vh] object-contain rounded-lg shadow-2xl">
+                        </div>
+                    `;
+                    break;
+                    
+                case 'video':
+                    mediaHtml = `
+                        <div class="text-center">
+                            <h3 class="text-white text-xl font-semibold mb-4">${title}</h3>
+                            <video controls class="max-w-full max-h-[80vh] rounded-lg shadow-2xl">
+                                <source src="${url}" type="video/mp4">
                                 Your browser does not support the video tag.
                             </video>
                         </div>
                     `;
-                }
-                
-                mediaHtml += '</div></div>';
+                    break;
+                    
+                case 'voice':
+                    mediaHtml = `
+                        <div class="text-center bg-white rounded-lg p-8 max-w-md mx-auto">
+                            <h3 class="text-gray-800 text-xl font-semibold mb-4">${title}</h3>
+                            <div class="flex items-center justify-center mb-4">
+                                <i class="fas fa-microphone text-amber-600 text-4xl"></i>
+                            </div>
+                            <audio controls class="w-full">
+                                <source src="${url}" type="audio/wav">
+                                Your browser does not support the audio element.
+                            </audio>
+                        </div>
+                    `;
+                    break;
             }
             
-            return mediaHtml;
+            content.innerHTML = mediaHtml;
+            modal.classList.remove('hidden');
+            
+            // Add keyboard event listener for ESC key
+            document.addEventListener('keydown', handlePreviewKeydown);
+        }
+        
+        function closeMediaPreviewModal() {
+            const modal = document.getElementById('mediaPreviewModal');
+            modal.classList.add('hidden');
+            
+            // Remove keyboard event listener
+            document.removeEventListener('keydown', handlePreviewKeydown);
+        }
+        
+        function handlePreviewKeydown(event) {
+            if (event.key === 'Escape') {
+                closeMediaPreviewModal();
+            }
         }
         
         // Helper function to generate UUID
@@ -557,6 +1306,8 @@
                 return v.toString(16);
             });
         }
+        
+
     </script>
 </body>
 </html>
