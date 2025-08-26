@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trade Journal</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .fade-in {
+            animation: fadeIn 0.5s ease-out forwards;
+        }
+        
+        .card-hover {
+            transition: all 0.3s ease;
+        }
+        
+        .card-hover:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+        }
+        
+        .input-focus:focus {
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.3);
+        }
+        
+        .btn-glow:hover {
+            box-shadow: 0 0 15px rgba(79, 70, 229, 0.5);
+        }
+        
+        .glass-effect {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+        }
+        
+        .media-preview {
+            transition: all 0.3s ease;
+        }
+        
+        .media-preview:hover {
+            transform: scale(1.02);
+        }
+    </style>
+</head>
+<body class="bg-gray-100 min-h-screen">
+    <div class="container mx-auto px-4 py-8">
+        <header class="mb-10 text-center">
+            <h1 class="text-4xl font-bold text-indigo-600 mb-2">Trade Journal</h1>
+            <p class="text-gray-600">Track your trading performance with multimedia notes</p>
+        </header>
+
+        <div class="flex flex-col lg:flex-row gap-8">
+            <!-- Trade Entry Form -->
+            <div class="w-full lg:w-1/3">
+                <div class="glass-effect rounded-xl shadow-lg p-6 sticky top-4">
+                    <h2 class="text-2xl font-semibold text-gray-800 mb-6">Log New Trade</h2>
+                    
+                    <form id="tradeForm" class="space-y-4">
+                        <div>
+                            <label for="title" class="block text-sm font-medium text-gray-700 mb-1">Trade Title*</label>
+                            <input type="text" id="title" required class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:border-indigo-500 input-focus transition">
+                        </div>
+                        
+                        <div>
+                            <label for="description" class="block text-sm font-medium text-gray-700 mb-1">Description</label>
+                            <textarea id="description" rows="3" class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:border-indigo-500 input-focus transition"></textarea>
+                        </div>
+                        
+                        <div>
+                            <label for="symbol" class="block text-sm font-medium text-gray-700 mb-1">Symbol*</label>
+                            <input type="text" id="symbol" required class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:border-indigo-500 input-focus transition">
+                        </div>
+                        
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label for="entryPrice" class="block text-sm font-medium text-gray-700 mb-1">Entry Price*</label>
+                                <input type="number" step="0.01" id="entryPrice" required class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:border-indigo-500 input-focus transition">
+                            </div>
+                            <div>
+                                <label for="exitPrice" class="block text-sm font-medium text-gray-700 mb-1">Exit Price*</label>
+                                <input type="number" step="0.01" id="exitPrice" required class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:border-indigo-500 input-focus transition">
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <label for="tradeDate" class="block text-sm font-medium text-gray-700 mb-1">Trade Date</label>
+                            <input type="date" id="tradeDate" class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:border-indigo-500 input-focus transition">
+                        </div>
+                        
+                        <!-- Media Uploads -->
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Trade Media</label>
+                                <div class="flex items-center space-x-4">
+                                    <label for="imageUpload" class="flex items-center justify-center w-12 h-12 rounded-full bg-indigo-100 text-indigo-600 cursor-pointer hover:bg-indigo-200 transition">
+                                        <i class="fas fa-image"></i>
+                                        <input type="file" id="imageUpload" accept="image/*" class="hidden">
+                                    </label>
+                                    
+                                    <label for="voiceUpload" class="flex items-center justify-center w-12 h-12 rounded-full bg-amber-100 text-amber-600 cursor-pointer hover:bg-amber-200 transition">
+                                        <i class="fas fa-microphone"></i>
+                                        <input type="file" id="voiceUpload" accept="audio/*" class="hidden">
+                                    </label>
+                                    
+                                    <label for="videoUpload" class="flex items-center justify-center w-12 h-12 rounded-full bg-emerald-100 text-emerald-600 cursor-pointer hover:bg-emerald-200 transition">
+                                        <i class="fas fa-video"></i>
+                                        <input type="file" id="videoUpload" accept="video/*" class="hidden">
+                                    </label>
+                                </div>
+                            </div>
+                            
+                            <div id="mediaPreviews" class="grid grid-cols-3 gap-2">
+                                <!-- Media previews will appear here -->
+                            </div>
+                        </div>
+                        
+                        <button type="submit" class="w-full bg-indigo-600 text-white py-3 rounded-lg font-medium hover:bg-indigo-700 btn-glow transition flex items-center justify-center space-x-2">
+                            <i class="fas fa-save"></i>
+                            <span>Save Trade</span>
+                        </button>
+                    </form>
+                </div>
+            </div>
+            
+            <!-- Trade Listing -->
+            <div class="w-full lg:w-2/3">
+                <div class="mb-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                    <h2 class="text-2xl font-semibold text-gray-800">Your Trades</h2>
+                    
+                    <div class="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+                        <input type="text" id="searchInput" placeholder="Search by symbol..." class="px-4 py-2 rounded-lg border border-gray-300 focus:border-indigo-500 input-focus transition w-full sm:w-48">
+                        
+                        <select id="filterPnl" class="px-4 py-2 rounded-lg border border-gray-300 focus:border-indigo-500 input-focus transition w-full sm:w-auto">
+                            <option value="all">All P&L</option>
+                            <option value="profit">Profit</option>
+                            <option value="loss">Loss</option>
+                        </select>
+                        
+                        <input type="date" id="filterDate" class="px-4 py-2 rounded-lg border border-gray-300 focus:border-indigo-500 input-focus transition w-full sm:w-auto">
+                    </div>
+                </div>
+                
+                <div id="tradeList" class="space-y-4">
+                    <!-- Trades will be loaded here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Supabase Configuration
+        const supabaseUrl = 'https://your-project.supabase.co';
+        const supabaseKey = 'your-supabase-key';
+        const supabase = supabase.createClient(supabaseUrl, supabaseKey);
+        
+        // DOM Elements
+        const tradeForm = document.getElementById('tradeForm');
+        const tradeList = document.getElementById('tradeList');
+        const searchInput = document.getElementById('searchInput');
+        const filterPnl = document.getElementById('filterPnl');
+        const filterDate = document.getElementById('filterDate');
+        const mediaPreviews = document.getElementById('mediaPreviews');
+        
+        // Media upload elements
+        const imageUpload = document.getElementById('imageUpload');
+        const voiceUpload = document.getElementById('voiceUpload');
+        const videoUpload = document.getElementById('videoUpload');
+        
+        // Store media files before upload
+        let mediaFiles = {
+            image: null,
+            voice: null,
+            video: null
+        };
+        
+        // Sample data for demonstration
+        const sampleTrades = [
+            {
+                id: '1',
+                title: 'Successful AAPL Trade',
+                description: 'Bought at support, sold at resistance',
+                symbol: 'AAPL',
+                entry_price: 145.50,
+                exit_price: 152.75,
+                pnl: 725.00,
+                trade_date: '2023-05-15',
+                created_at: '2023-05-15T10:30:00',
+                image_url: 'https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=500&q=80',
+                voice_url: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3',
+                video_url: null
+            },
+            {
+                id: '2',
+                title: 'TSLA Short',
+                description: 'Short at resistance with high volume',
+                symbol: 'TSLA',
+                entry_price: 280.00,
+                exit_price: 265.50,
+                pnl: 1450.00,
+                trade_date: '2023-05-18',
+                created_at: '2023-05-18T14:45:00',
+                image_url: 'https://images.unsplash.com/photo-1636466497217-26a8cbeaf0aa?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=500&q=80',
+                voice_url: null,
+                video_url: 'https://samplelib.com/lib/preview/mp4/sample-5s.mp4'
+            },
+            {
+                id: '3',
+                title: 'Failed NVDA Trade',
+                description: 'Missed earnings reaction',
+                symbol: 'NVDA',
+                entry_price: 305.00,
+                exit_price: 295.25,
+                pnl: -975.00,
+                trade_date: '2023-05-20',
+                created_at: '2023-05-20T09:15:00',
+                image_url: null,
+                voice_url: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3',
+                video_url: null
+            }
+        ];
+        
+        // Initialize the app
+        document.addEventListener('DOMContentLoaded', () => {
+            // Set default date to today
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('tradeDate').value = today;
+            filterDate.value = '';
+            
+            // Load sample trades (in a real app, this would fetch from Supabase)
+            renderTrades(sampleTrades);
+            
+            // Setup event listeners
+            setupEventListeners();
+        });
+        
+        function setupEventListeners() {
+            // Form submission
+            tradeForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                
+                try {
+                    // Get form values
+                    const title = document.getElementById('title').value;
+                    const description = document.getElementById('description').value;
+                    const symbol = document.getElementById('symbol').value.toUpperCase();
+                    const entryPrice = parseFloat(document.getElementById('entryPrice').value);
+                    const exitPrice = parseFloat(document.getElementById('exitPrice').value);
+                    const tradeDate = document.getElementById('tradeDate').value || new Date().toISOString().split('T')[0];
+                    const pnl = exitPrice - entryPrice;
+                    
+                    // Validate required fields
+                    if (!title || !symbol || isNaN(entryPrice) || isNaN(exitPrice)) {
+                        alert('Please fill in all required fields');
+                        return;
+                    }
+                    
+                    // Generate a unique ID for the trade (in a real app, this would come from Supabase)
+                    const tradeId = generateUUID();
+                    
+                    // Upload media files and get URLs
+                    let imageUrl = null;
+                    let voiceUrl = null;
+                    let videoUrl = null;
+                    
+                    if (mediaFiles.image) {
+                        // In a real app, upload to Supabase storage
+                        // imageUrl = await uploadMedia(tradeId, 'image', mediaFiles.image);
+                        imageUrl = `https://example.com/trade_media/${tradeId}/image.jpg`; // Simulated URL
+                    }
+                    
+                    if (mediaFiles.voice) {
+                        // voiceUrl = await uploadMedia(tradeId, 'voice', mediaFiles.voice);
+                        voiceUrl = `https://example.com/trade_media/${tradeId}/voice.mp3`; // Simulated URL
+                    }
+                    
+                    if (mediaFiles.video) {
+                        // videoUrl = await uploadMedia(tradeId, 'video', mediaFiles.video);
+                        videoUrl = `https://example.com/trade_media/${tradeId}/video.mp4`; // Simulated URL
+                    }
+                    
+                    // Create trade object
+                    const newTrade = {
+                        id: tradeId,
+                        title,
+                        description,
+                        symbol,
+                        entry_price: entryPrice,
+                        exit_price: exitPrice,
+                        pnl,
+                        trade_date: tradeDate,
+                        created_at: new Date().toISOString(),
+                        image_url: imageUrl,
+                        voice_url: voiceUrl,
+                        video_url: videoUrl
+                    };
+                    
+                    // In a real app, insert into Supabase
+                    // const { data, error } = await supabase
+                    //     .from('trades')
+                    //     .insert([newTrade]);
+                    
+                    // For demo, add to sample trades
+                    sampleTrades.unshift(newTrade);
+                    
+                    // Clear form
+                    tradeForm.reset();
+                    document.getElementById('tradeDate').value = today;
+                    mediaPreviews.innerHTML = '';
+                    mediaFiles = { image: null, voice: null, video: null };
+                    
+                    // Refresh trade list
+                    renderTrades(sampleTrades);
+                    
+                    // Show success message
+                    alert('Trade saved successfully!');
+                    
+                } catch (error) {
+                    console.error('Error saving trade:', error);
+                    alert('An error occurred while saving the trade');
+                }
+            });
+            
+            // Media upload handlers
+            imageUpload.addEventListener('change', (e) => handleMediaUpload(e, 'image'));
+            voiceUpload.addEventListener('change', (e) => handleMediaUpload(e, 'voice'));
+            videoUpload.addEventListener('change', (e) => handleMediaUpload(e, 'video'));
+            
+            // Search and filter handlers
+            searchInput.addEventListener('input', () => filterTrades());
+            filterPnl.addEventListener('change', () => filterTrades());
+            filterDate.addEventListener('change', () => filterTrades());
+        }
+        
+        function handleMediaUpload(event, type) {
+            const file = event.target.files[0];
+            if (!file) return;
+            
+            mediaFiles[type] = file;
+            
+            // Create preview
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                // Remove existing preview of this type
+                const existingPreview = document.getElementById(`${type}-preview`);
+                if (existingPreview) {
+                    existingPreview.remove();
+                }
+                
+                let previewElement;
+                
+                if (type === 'image') {
+                    previewElement = document.createElement('img');
+                    previewElement.src = e.target.result;
+                    previewElement.alt = 'Image preview';
+                } else if (type === 'voice') {
+                    previewElement = document.createElement('div');
+                    previewElement.className = 'flex items-center justify-center bg-amber-100 rounded-lg p-2';
+                    previewElement.innerHTML = `
+                        <i class="fas fa-microphone text-amber-600 mr-2"></i>
+                        <span class="text-sm text-amber-800">${file.name}</span>
+                    `;
+                } else if (type === 'video') {
+                    previewElement = document.createElement('video');
+                    previewElement.src = e.target.result;
+                    previewElement.controls = true;
+                }
+                
+                previewElement.id = `${type}-preview`;
+                previewElement.className += ' media-preview w-full h-24 object-cover rounded-lg border border-gray-200';
+                
+                mediaPreviews.appendChild(previewElement);
+            };
+            
+            if (type === 'image' || type === 'video') {
+                reader.readAsDataURL(file);
+            } else {
+                reader.readAsText(file); // For audio, we just show the file name
+            }
+        }
+        
+        async function uploadMedia(tradeId, type, file) {
+            // In a real implementation, this would upload to Supabase storage
+            const filePath = `trade_media/${tradeId}/${type}.${file.name.split('.').pop()}`;
+            
+            // const { data, error } = await supabase
+            //     .storage
+            //     .from('trade_media')
+            //     .upload(filePath, file);
+            
+            // if (error) throw error;
+            
+            // Get public URL
+            // const { data: { publicUrl } } = supabase
+            //     .storage
+            //     .from('trade_media')
+            //     .getPublicUrl(filePath);
+            
+            // return publicUrl;
+            
+            // For demo, return a simulated URL
+            return `https://example.com/${filePath}`;
+        }
+        
+        function filterTrades() {
+            const searchTerm = searchInput.value.toLowerCase();
+            const pnlFilter = filterPnl.value;
+            const dateFilter = filterDate.value;
+            
+            let filtered = [...sampleTrades];
+            
+            if (searchTerm) {
+                filtered = filtered.filter(trade => 
+                    trade.symbol.toLowerCase().includes(searchTerm) || 
+                    trade.title.toLowerCase().includes(searchTerm)
+                );
+            }
+            
+            if (pnlFilter !== 'all') {
+                filtered = filtered.filter(trade => 
+                    pnlFilter === 'profit' ? trade.pnl >= 0 : trade.pnl < 0
+                );
+            }
+            
+            if (dateFilter) {
+                filtered = filtered.filter(trade => trade.trade_date === dateFilter);
+            }
+            
+            renderTrades(filtered);
+        }
+        
+        function renderTrades(trades) {
+            tradeList.innerHTML = '';
+            
+            if (trades.length === 0) {
+                tradeList.innerHTML = `
+                    <div class="text-center py-10 text-gray-500">
+                        <i class="fas fa-box-open text-4xl mb-2"></i>
+                        <p>No trades found</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            trades.forEach((trade, index) => {
+                const tradeCard = document.createElement('div');
+                tradeCard.className = `bg-white rounded-xl shadow-md overflow-hidden card-hover fade-in`;
+                tradeCard.style.animationDelay = `${index * 0.1}s`;
+                
+                const pnlClass = trade.pnl >= 0 ? 'text-emerald-600' : 'text-red-600';
+                const pnlIcon = trade.pnl >= 0 ? 'fa-arrow-up' : 'fa-arrow-down';
+                
+                // Format date
+                const formattedDate = new Date(trade.trade_date).toLocaleDateString('en-US', {
+                    year: 'numeric',
+                    month: 'short',
+                    day: 'numeric'
+                });
+                
+                tradeCard.innerHTML = `
+                    <div class="p-6">
+                        <div class="flex justify-between items-start mb-2">
+                            <div>
+                                <h3 class="text-xl font-semibold text-gray-800">${trade.title}</h3>
+                                <div class="flex items-center mt-1 space-x-2 text-sm text-gray-600">
+                                    <span class="bg-indigo-100 text-indigo-800 px-2 py-1 rounded-full">
+                                        <i class="fas fa-chart-line mr-1"></i> ${trade.symbol}
+                                    </span>
+                                    <span><i class="far fa-calendar mr-1"></i> ${formattedDate}</span>
+                                </div>
+                            </div>
+                            <div class="text-right">
+                                <span class="text-sm text-gray-500">P&L</span>
+                                <div class="${pnlClass} font-bold">
+                                    <i class="fas ${pnlIcon} mr-1"></i> $${Math.abs(trade.pnl).toFixed(2)}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        ${trade.description ? `<p class="text-gray-600 mt-3 mb-4">${trade.description}</p>` : ''}
+                        
+                        <div class="grid grid-cols-2 gap-4 mb-4">
+                            <div class="bg-gray-50 p-3 rounded-lg">
+                                <span class="text-sm text-gray-500">Entry</span>
+                                <div class="font-medium">$${trade.entry_price.toFixed(2)}</div>
+                            </div>
+                            <div class="bg-gray-50 p-3 rounded-lg">
+                                <span class="text-sm text-gray-500">Exit</span>
+                                <div class="font-medium">$${trade.exit_price.toFixed(2)}</div>
+                            </div>
+                        </div>
+                        
+                        ${renderMediaSection(trade)}
+                    </div>
+                `;
+                
+                tradeList.appendChild(tradeCard);
+            });
+        }
+        
+        function renderMediaSection(trade) {
+            let mediaHtml = '';
+            
+            if (trade.image_url || trade.voice_url || trade.video_url) {
+                mediaHtml += '<div class="mt-4"><h4 class="text-sm font-medium text-gray-700 mb-2">Trade Media</h4><div class="flex flex-wrap gap-3">';
+                
+                if (trade.image_url) {
+                    mediaHtml += `
+                        <div class="relative group">
+                            <img src="${trade.image_url}" alt="Trade image" class="w-24 h-24 object-cover rounded-lg border border-gray-200 media-preview">
+                            <div class="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition rounded-lg">
+                                <i class="fas fa-expand text-white"></i>
+                            </div>
+                        </div>
+                    `;
+                }
+                
+                if (trade.voice_url) {
+                    mediaHtml += `
+                        <div class="bg-amber-50 p-3 rounded-lg border border-amber-100 w-full max-w-md">
+                            <audio controls class="w-full">
+                                <source src="${trade.voice_url}" type="audio/mpeg">
+                                Your browser does not support the audio element.
+                            </audio>
+                        </div>
+                    `;
+                }
+                
+                if (trade.video_url) {
+                    mediaHtml += `
+                        <div class="relative group w-full">
+                            <video controls class="w-full rounded-lg border border-gray-200 media-preview">
+                                <source src="${trade.video_url}" type="video/mp4">
+                                Your browser does not support the video tag.
+                            </video>
+                        </div>
+                    `;
+                }
+                
+                mediaHtml += '</div></div>';
+            }
+            
+            return mediaHtml;
+        }
+        
+        // Helper function to generate UUID
+        function generateUUID() {
+            return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+                const r = Math.random() * 16 | 0;
+                const v = c === 'x' ? r : (r & 0x3 | 0x8);
+                return v.toString(16);
+            });
+        }
+    </script>
+</body>
+</html>
