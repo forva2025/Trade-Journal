@@ -10,72 +10,602 @@
     <script src="config.js"></script>
     <script src="supabase-service.js"></script>
     <style>
+        /* Custom CSS for enhanced styling */
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        
+        * {
+            font-family: 'Inter', sans-serif;
+        }
+        
         @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
+            from { 
+                opacity: 0; 
+                transform: translateY(20px); 
+            }
+            to { 
+                opacity: 1; 
+                transform: translateY(0); 
+            }
+        }
+        
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+        
+        @keyframes pulse {
+            0%, 100% {
+                opacity: 1;
+            }
+            50% {
+                opacity: 0.7;
+            }
         }
         
         .fade-in {
-            animation: fadeIn 0.5s ease-out forwards;
+            animation: fadeIn 0.6s ease-out forwards;
+        }
+        
+        .slide-in {
+            animation: slideIn 0.5s ease-out forwards;
+        }
+        
+        .pulse-animation {
+            animation: pulse 2s infinite;
         }
         
         .card-hover {
-            transition: all 0.3s ease;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 1px solid transparent;
         }
         
         .card-hover:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+            transform: translateY(-8px);
+            box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.15);
+            border-color: rgba(79, 70, 229, 0.1);
         }
         
         .input-focus:focus {
-            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.3);
+            outline: none;
+            border-color: #6366f1;
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
         }
         
         .btn-glow:hover {
-            box-shadow: 0 0 15px rgba(79, 70, 229, 0.5);
+            box-shadow: 0 0 20px rgba(99, 102, 241, 0.4);
+            transform: translateY(-1px);
         }
         
         .glass-effect {
-            background: rgba(255, 255, 255, 0.8);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
         }
         
         .media-preview {
-            transition: all 0.3s ease;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            cursor: pointer;
         }
         
         .media-preview:hover {
+            transform: scale(1.03);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+        }
+        
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        
+        .gradient-text {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 12px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px -5px rgba(102, 126, 234, 0.4);
+        }
+        
+        .btn-secondary {
+            background: white;
+            color: #6366f1;
+            padding: 12px 24px;
+            border-radius: 12px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            border: 2px solid #6366f1;
+            cursor: pointer;
+        }
+        
+        .btn-secondary:hover {
+            background: #6366f1;
+            color: white;
+            transform: translateY(-2px);
+        }
+        
+        .btn-danger {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 12px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+        }
+        
+        .btn-danger:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px -5px rgba(239, 68, 68, 0.4);
+        }
+        
+        .btn-success {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 12px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+        }
+        
+        .btn-success:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px -5px rgba(16, 185, 129, 0.4);
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e5e7eb;
+            border-radius: 12px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            background: white;
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: #6366f1;
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+            transform: translateY(-1px);
+        }
+        
+        .form-label {
+            display: block;
+            font-size: 14px;
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 8px;
+        }
+        
+        .media-upload-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+        
+        .media-upload-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.2);
+        }
+        
+        .media-upload-btn.image {
+            background: linear-gradient(135deg, #e0e7ff 0%, #c7d2fe 100%);
+            color: #4f46e5;
+        }
+        
+        .media-upload-btn.voice {
+            background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+            color: #d97706;
+        }
+        
+        .media-upload-btn.video {
+            background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+            color: #059669;
+        }
+        
+        .trade-card {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            overflow: hidden;
+            transition: all 0.3s ease;
+            border: 1px solid #f3f4f6;
+        }
+        
+        .trade-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+            border-color: #e0e7ff;
+        }
+        
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(5px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+        
+        .modal-content {
+            background: white;
+            border-radius: 20px;
+            padding: 32px;
+            max-width: 90vw;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.25);
+            animation: slideIn 0.3s ease-out;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin: 24px 0;
+        }
+        
+        .stat-card {
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+            padding: 20px;
+            border-radius: 16px;
+            text-align: center;
+            border: 1px solid #e2e8f0;
+        }
+        
+        .stat-value {
+            font-size: 24px;
+            font-weight: 700;
+            color: #1e293b;
+            margin-bottom: 4px;
+        }
+        
+        .stat-label {
+            font-size: 14px;
+            color: #64748b;
+            font-weight: 500;
+        }
+        
+        .search-container {
+            background: white;
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            margin-bottom: 24px;
+        }
+        
+        .search-input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e5e7eb;
+            border-radius: 12px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+        
+        .search-input:focus {
+            outline: none;
+            border-color: #6366f1;
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+        }
+        
+        .filter-select {
+            padding: 12px 16px;
+            border: 2px solid #e5e7eb;
+            border-radius: 12px;
+            font-size: 16px;
+            background: white;
+            transition: all 0.3s ease;
+        }
+        
+        .filter-select:focus {
+            outline: none;
+            border-color: #6366f1;
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+        }
+        
+        .media-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 16px;
+            margin-top: 16px;
+        }
+        
+        .media-item {
+            border-radius: 16px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+        
+        .media-item:hover {
             transform: scale(1.02);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+        }
+        
+        .voice-note {
+            background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+            padding: 20px;
+            border-radius: 16px;
+            border: 1px solid #fbbf24;
+        }
+        
+        .profit {
+            color: #059669;
+            font-weight: 700;
+        }
+        
+        .loss {
+            color: #dc2626;
+            font-weight: 700;
+        }
+        
+        .symbol-badge {
+            background: linear-gradient(135deg, #e0e7ff 0%, #c7d2fe 100%);
+            color: #4f46e5;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        
+        .date-badge {
+            background: #f3f4f6;
+            color: #6b7280;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+        
+        /* Responsive design */
+        @media (max-width: 768px) {
+            .container {
+                padding: 16px;
+            }
+            
+            .modal-content {
+                margin: 16px;
+                padding: 24px;
+            }
+            
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .media-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        /* Loading states */
+        .loading {
+            opacity: 0.6;
+            pointer-events: none;
+        }
+        
+        .loading::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 20px;
+            height: 20px;
+            margin: -10px 0 0 -10px;
+            border: 2px solid #6366f1;
+            border-top-color: transparent;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+        
+        /* Enhanced hover effects */
+        .btn-primary:active,
+        .btn-secondary:active,
+        .btn-danger:active,
+        .btn-success:active {
+            transform: translateY(0);
+        }
+        
+        /* Smooth scrolling */
+        html {
+            scroll-behavior: smooth;
+        }
+        
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9;
+            border-radius: 4px;
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+        
+        /* Focus visible for accessibility */
+        .btn-primary:focus-visible,
+        .btn-secondary:focus-visible,
+        .btn-danger:focus-visible,
+        .btn-success:focus-visible,
+        .form-input:focus-visible {
+            outline: 2px solid #6366f1;
+            outline-offset: 2px;
+        }
+        
+        /* Enhanced shadows */
+        .shadow-2xl {
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+        }
+        
+        /* Glass morphism enhancement */
+        .glass-effect {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+        
+        /* View Toggle Styles */
+        .view-toggle-btn {
+            color: #6b7280;
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .view-toggle-btn:hover {
+            color: #374151;
+        }
+        
+        .view-toggle-btn.active {
+            color: #6366f1;
+            background: white;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+        
+        .view-toggle-btn.active::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, #e0e7ff 0%, #c7d2fe 100%);
+            opacity: 0.1;
+            border-radius: 12px;
+        }
+        
+        /* List View Styles */
+        .list-view {
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+        
+        .list-view .trade-card {
+            width: 100%;
+        }
+        
+        .list-view .trade-card .p-8 {
+            padding: 32px;
+        }
+        
+        /* Grid View Styles */
+        .grid-view {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 24px;
+        }
+        
+        .grid-view .trade-card {
+            flex: 1 1 100%;
+            min-width: 300px;
+        }
+        
+        .grid-view .trade-card .p-8 {
+            padding: 24px;
+        }
+        
+        @media (min-width: 768px) {
+            .grid-view .trade-card {
+                flex: 1 1 calc(50% - 12px);
+                max-width: calc(50% - 12px);
+            }
+        }
+        
+        @media (min-width: 1024px) {
+            .grid-view .trade-card {
+                flex: 1 1 calc(33.333% - 16px);
+                max-width: calc(33.333% - 16px);
+            }
+        }
+        
+        @media (min-width: 1280px) {
+            .grid-view .trade-card {
+                flex: 1 1 calc(25% - 12px);
+                max-width: calc(25% - 12px);
+            }
         }
     </style>
 </head>
-<body class="bg-gray-100 min-h-screen">
+<body class="bg-gradient-to-br from-gray-50 to-gray-100 min-h-screen">
     <div class="container mx-auto px-4 py-8">
-        <header class="mb-10 text-center">
-            <h1 class="text-4xl font-bold text-indigo-600 mb-2">Trade Journal</h1>
-            <p class="text-gray-600">Track your trading performance with multimedia notes</p>
+        <header class="mb-12 text-center">
+            <h1 class="text-5xl font-bold gradient-text mb-4">Trade Journal</h1>
+            <p class="text-xl text-gray-600 mb-8">Track your trading performance with multimedia notes</p>
             
             <!-- Authentication Section -->
-            <div id="authSection" class="mt-6">
-                <div id="loginForm" class="max-w-md mx-auto bg-white rounded-lg shadow-md p-6">
-                    <h3 class="text-xl font-semibold text-gray-800 mb-4">Sign In</h3>
-                    <form id="authForm" class="space-y-4">
+            <div id="authSection" class="mt-8">
+                <div id="loginForm" class="max-w-md mx-auto glass-effect rounded-2xl shadow-2xl p-8">
+                    <h3 class="text-2xl font-semibold text-gray-800 mb-6">Sign In</h3>
+                    <form id="authForm" class="space-y-6">
                         <div>
-                            <label for="email" class="block text-sm font-medium text-gray-700 mb-1">Email</label>
-                            <input type="email" id="email" required class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:border-indigo-500 input-focus transition">
+                            <label for="email" class="form-label">Email</label>
+                            <input type="email" id="email" required class="form-input">
                         </div>
                         <div>
-                            <label for="password" class="block text-sm font-medium text-gray-700 mb-1">Password</label>
-                            <input type="password" id="password" required class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:border-indigo-500 input-focus transition">
+                            <label for="password" class="form-label">Password</label>
+                            <input type="password" id="password" required class="form-input">
                         </div>
-                        <button type="submit" class="w-full bg-indigo-600 text-white py-2 rounded-lg font-medium hover:bg-indigo-700 transition">
+                        <button type="submit" class="btn-primary w-full">
                             Sign In
                         </button>
                     </form>
-                    <div class="mt-4 text-center">
-                        <button id="toggleAuth" class="text-indigo-600 hover:text-indigo-800 text-sm">
+                    <div class="mt-6 text-center">
+                        <button id="toggleAuth" class="text-indigo-600 hover:text-indigo-800 text-sm font-medium transition-colors">
                             Don't have an account? Sign Up
                         </button>
                     </div>
@@ -83,10 +613,10 @@
             </div>
             
             <!-- User Info Section (hidden initially) -->
-            <div id="userSection" class="mt-6 hidden">
-                <div class="flex items-center justify-center space-x-4">
-                    <span id="userEmail" class="text-gray-700"></span>
-                    <button id="signOutBtn" class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition">
+            <div id="userSection" class="mt-8 hidden">
+                <div class="flex items-center justify-center space-x-6">
+                    <span id="userEmail" class="text-lg text-gray-700 font-medium"></span>
+                    <button id="signOutBtn" class="btn-danger">
                         Sign Out
                     </button>
                 </div>
@@ -96,70 +626,68 @@
         <div id="mainContent" class="flex flex-col lg:flex-row gap-8 hidden">
             <!-- Trade Entry Form -->
             <div class="w-full lg:w-1/3">
-                <div class="glass-effect rounded-xl shadow-lg p-6 sticky top-4">
-                    <h2 class="text-2xl font-semibold text-gray-800 mb-6">Log New Trade</h2>
+                <div class="glass-effect rounded-2xl shadow-2xl p-8 sticky top-4">
+                    <h2 class="text-3xl font-semibold text-gray-800 mb-8">Log New Trade</h2>
                     
-                    <form id="tradeForm" class="space-y-4">
+                    <form id="tradeForm" class="space-y-6">
                         <div>
-                            <label for="title" class="block text-sm font-medium text-gray-700 mb-1">Trade Title*</label>
-                            <input type="text" id="title" required class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:border-indigo-500 input-focus transition">
+                            <label for="title" class="form-label">Trade Title*</label>
+                            <input type="text" id="title" required class="form-input">
                         </div>
                         
                         <div>
-                            <label for="description" class="block text-sm font-medium text-gray-700 mb-1">Description</label>
-                            <textarea id="description" rows="3" class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:border-indigo-500 input-focus transition"></textarea>
+                            <label for="description" class="form-label">Description</label>
+                            <textarea id="description" rows="4" class="form-input resize-none"></textarea>
                         </div>
                         
                         <div>
-                            <label for="symbol" class="block text-sm font-medium text-gray-700 mb-1">Symbol*</label>
-                            <input type="text" id="symbol" required class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:border-indigo-500 input-focus transition">
+                            <label for="symbol" class="form-label">Symbol*</label>
+                            <input type="text" id="symbol" required class="form-input">
                         </div>
                         
                         <div class="grid grid-cols-2 gap-4">
                             <div>
-                                <label for="entryPrice" class="block text-sm font-medium text-gray-700 mb-1">Entry Price*</label>
-                                <input type="number" step="0.01" id="entryPrice" required class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:border-indigo-500 input-focus transition">
+                                <label for="entryPrice" class="form-label">Entry Price*</label>
+                                <input type="number" step="0.01" id="entryPrice" required class="form-input">
                             </div>
                             <div>
-                                <label for="exitPrice" class="block text-sm font-medium text-gray-700 mb-1">Exit Price*</label>
-                                <input type="number" step="0.01" id="exitPrice" required class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:border-indigo-500 input-focus transition">
+                                <label for="exitPrice" class="form-label">Exit Price*</label>
+                                <input type="number" step="0.01" id="exitPrice" required class="form-input">
                             </div>
                         </div>
                         
                         <div>
-                            <label for="tradeDate" class="block text-sm font-medium text-gray-700 mb-1">Trade Date</label>
-                            <input type="date" id="tradeDate" class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:border-indigo-500 input-focus transition">
+                            <label for="tradeDate" class="form-label">Trade Date</label>
+                            <input type="date" id="tradeDate" class="form-input">
                         </div>
                         
                         <!-- Media Uploads -->
-                        <div class="space-y-4">
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">Trade Media</label>
-                                <div class="flex items-center space-x-4">
-                                    <label for="imageUpload" class="flex items-center justify-center w-12 h-12 rounded-full bg-indigo-100 text-indigo-600 cursor-pointer hover:bg-indigo-200 transition">
-                                        <i class="fas fa-image"></i>
-                                        <input type="file" id="imageUpload" accept="image/*" class="hidden">
-                                    </label>
-                                    
-                                    <button type="button" id="voiceRecordBtn" class="flex items-center justify-center w-12 h-12 rounded-full bg-amber-100 text-amber-600 cursor-pointer hover:bg-amber-200 transition">
-                                        <i class="fas fa-microphone"></i>
-                                    </button>
-                                    
-                                    <label for="videoUpload" class="flex items-center justify-center w-12 h-12 rounded-full bg-emerald-100 text-emerald-600 cursor-pointer hover:bg-emerald-200 transition">
-                                        <i class="fas fa-video"></i>
-                                        <input type="file" id="videoUpload" accept="video/*" class="hidden">
-                                    </label>
-                                </div>
+                        <div class="space-y-6">
+                            <label class="form-label">Trade Media</label>
+                            <div class="flex items-center justify-center space-x-6">
+                                <label for="imageUpload" class="media-upload-btn image">
+                                    <i class="fas fa-image text-xl"></i>
+                                    <input type="file" id="imageUpload" accept="image/*" class="hidden">
+                                </label>
+                                
+                                <button type="button" id="voiceRecordBtn" class="media-upload-btn voice">
+                                    <i class="fas fa-microphone text-xl"></i>
+                                </button>
+                                
+                                <label for="videoUpload" class="media-upload-btn video">
+                                    <i class="fas fa-video text-xl"></i>
+                                    <input type="file" id="videoUpload" accept="video/*" class="hidden">
+                                </label>
                             </div>
                             
-                            <div id="mediaPreviews" class="grid grid-cols-3 gap-2">
+                            <div id="mediaPreviews" class="grid grid-cols-3 gap-3">
                                 <!-- Media previews will appear here -->
                             </div>
                         </div>
                         
-                        <button type="submit" class="w-full bg-indigo-600 text-white py-3 rounded-lg font-medium hover:bg-indigo-700 btn-glow transition flex items-center justify-center space-x-2">
-                            <i class="fas fa-save"></i>
-                            <span>Save Trade</span>
+                        <button type="submit" class="btn-primary w-full text-lg py-4">
+                            <i class="fas fa-save mr-2"></i>
+                            Save Trade
                         </button>
                     </form>
                 </div>
@@ -167,23 +695,39 @@
             
             <!-- Trade Listing -->
             <div class="w-full lg:w-2/3">
-                <div class="mb-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                    <h2 class="text-2xl font-semibold text-gray-800">Your Trades</h2>
+                <div class="search-container">
+                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                        <h2 class="text-3xl font-semibold text-gray-800">Your Trades</h2>
+                        
+                        <div class="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
+                            <input type="text" id="searchInput" placeholder="Search by symbol..." class="search-input w-full sm:w-64">
+                            
+                            <select id="filterPnl" class="filter-select w-full sm:w-auto">
+                                <option value="all">All P&L</option>
+                                <option value="profit">Profit</option>
+                                <option value="loss">Loss</option>
+                            </select>
+                            
+                            <input type="date" id="filterDate" class="filter-select w-full sm:w-auto">
+                        </div>
+                    </div>
                     
-                    <div class="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
-                        <input type="text" id="searchInput" placeholder="Search by symbol..." class="px-4 py-2 rounded-lg border border-gray-300 focus:border-indigo-500 input-focus transition w-full sm:w-48">
-                        
-                        <select id="filterPnl" class="px-4 py-2 rounded-lg border border-gray-300 focus:border-indigo-500 input-focus transition w-full sm:w-auto">
-                            <option value="all">All P&L</option>
-                            <option value="profit">Profit</option>
-                            <option value="loss">Loss</option>
-                        </select>
-                        
-                        <input type="date" id="filterDate" class="px-4 py-2 rounded-lg border border-gray-300 focus:border-indigo-500 input-focus transition w-full sm:w-auto">
+                    <!-- View Toggle -->
+                    <div class="flex items-center justify-center mt-6">
+                        <div class="bg-gray-100 rounded-2xl p-1 flex">
+                            <button id="listViewBtn" class="view-toggle-btn active px-6 py-2 rounded-xl text-sm font-medium transition-all duration-200">
+                                <i class="fas fa-list mr-2"></i>
+                                List View
+                            </button>
+                            <button id="gridViewBtn" class="view-toggle-btn px-6 py-2 rounded-xl text-sm font-medium transition-all duration-200">
+                                <i class="fas fa-th-large mr-2"></i>
+                                Grid View
+                            </button>
+                        </div>
                     </div>
                 </div>
                 
-                <div id="tradeList" class="space-y-4">
+                <div id="tradeList" class="space-y-6">
                     <!-- Trades will be loaded here -->
                 </div>
             </div>
@@ -191,54 +735,54 @@
     </div>
 
     <!-- Edit Trade Modal -->
-    <div id="editModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
-        <div class="bg-white rounded-xl shadow-lg p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-            <div class="flex justify-between items-center mb-6">
-                <h3 class="text-2xl font-semibold text-gray-800">Edit Trade</h3>
-                <button onclick="closeEditModal()" class="text-gray-500 hover:text-gray-700">
-                    <i class="fas fa-times text-xl"></i>
+    <div id="editModal" class="modal-overlay hidden">
+        <div class="modal-content w-full max-w-2xl">
+            <div class="flex justify-between items-center mb-8">
+                <h3 class="text-3xl font-semibold text-gray-800">Edit Trade</h3>
+                <button onclick="closeEditModal()" class="text-gray-500 hover:text-gray-700 text-2xl">
+                    <i class="fas fa-times"></i>
                 </button>
             </div>
             
-            <form id="editTradeForm" class="space-y-4">
+            <form id="editTradeForm" class="space-y-6">
                 <input type="hidden" id="editTradeId">
                 
                 <div>
-                    <label for="editTitle" class="block text-sm font-medium text-gray-700 mb-1">Trade Title*</label>
-                    <input type="text" id="editTitle" required class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:border-indigo-500 input-focus transition">
+                    <label for="editTitle" class="form-label">Trade Title*</label>
+                    <input type="text" id="editTitle" required class="form-input">
                 </div>
                 
                 <div>
-                    <label for="editDescription" class="block text-sm font-medium text-gray-700 mb-1">Description</label>
-                    <textarea id="editDescription" rows="3" class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:border-indigo-500 input-focus transition"></textarea>
+                    <label for="editDescription" class="form-label">Description</label>
+                    <textarea id="editDescription" rows="4" class="form-input resize-none"></textarea>
                 </div>
                 
                 <div>
-                    <label for="editSymbol" class="block text-sm font-medium text-gray-700 mb-1">Symbol*</label>
-                    <input type="text" id="editSymbol" required class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:border-indigo-500 input-focus transition">
+                    <label for="editSymbol" class="form-label">Symbol*</label>
+                    <input type="text" id="editSymbol" required class="form-input">
                 </div>
                 
                 <div class="grid grid-cols-2 gap-4">
                     <div>
-                        <label for="editEntryPrice" class="block text-sm font-medium text-gray-700 mb-1">Entry Price*</label>
-                        <input type="number" step="0.01" id="editEntryPrice" required class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:border-indigo-500 input-focus transition">
+                        <label for="editEntryPrice" class="form-label">Entry Price*</label>
+                        <input type="number" step="0.01" id="editEntryPrice" required class="form-input">
                     </div>
                     <div>
-                        <label for="editExitPrice" class="block text-sm font-medium text-gray-700 mb-1">Exit Price*</label>
-                        <input type="number" step="0.01" id="editExitPrice" required class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:border-indigo-500 input-focus transition">
+                        <label for="editExitPrice" class="form-label">Exit Price*</label>
+                        <input type="number" step="0.01" id="editExitPrice" required class="form-input">
                     </div>
                 </div>
                 
                 <div>
-                    <label for="editTradeDate" class="block text-sm font-medium text-gray-700 mb-1">Trade Date</label>
-                    <input type="date" id="editTradeDate" class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:border-indigo-500 input-focus transition">
+                    <label for="editTradeDate" class="form-label">Trade Date</label>
+                    <input type="date" id="editTradeDate" class="form-input">
                 </div>
                 
-                <div class="flex justify-end space-x-3 pt-4">
-                    <button type="button" onclick="closeEditModal()" class="px-4 py-2 text-gray-600 border border-gray-300 rounded-lg hover:bg-gray-50 transition">
+                <div class="flex justify-end space-x-4 pt-6">
+                    <button type="button" onclick="closeEditModal()" class="btn-secondary">
                         Cancel
                     </button>
-                    <button type="submit" class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition">
+                    <button type="submit" class="btn-primary">
                         Update Trade
                     </button>
                 </div>
@@ -247,62 +791,72 @@
     </div>
 
     <!-- Media Preview Modal -->
-    <div id="mediaPreviewModal" class="fixed inset-0 bg-black bg-opacity-90 flex items-center justify-center z-50 hidden">
+    <div id="mediaPreviewModal" class="modal-overlay hidden">
         <div class="relative w-full h-full flex items-center justify-center p-4">
-            <button onclick="closeMediaPreviewModal()" class="absolute top-4 right-4 text-white hover:text-gray-300 z-10">
-                <i class="fas fa-times text-3xl"></i>
+            <button onclick="closeMediaPreviewModal()" class="absolute top-6 right-6 text-white hover:text-gray-300 z-10 text-3xl">
+                <i class="fas fa-times"></i>
             </button>
             
-            <div id="mediaPreviewContent" class="max-w-4xl max-h-full overflow-auto">
+            <div id="mediaPreviewContent" class="max-w-5xl max-h-full overflow-auto">
                 <!-- Media content will be inserted here -->
             </div>
         </div>
     </div>
 
     <!-- Add Media Modal -->
-    <div id="addMediaModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
-        <div class="bg-white rounded-xl shadow-lg p-6 w-full max-w-md">
-            <div class="flex justify-between items-center mb-6">
-                <h3 class="text-xl font-semibold text-gray-800">Add Media to Trade</h3>
-                <button onclick="closeAddMediaModal()" class="text-gray-500 hover:text-gray-700">
-                    <i class="fas fa-times text-xl"></i>
+    <div id="addMediaModal" class="modal-overlay hidden">
+        <div class="modal-content w-full max-w-md">
+            <div class="flex justify-between items-center mb-8">
+                <h3 class="text-2xl font-semibold text-gray-800">Add Media to Trade</h3>
+                <button onclick="closeAddMediaModal()" class="text-gray-500 hover:text-gray-700 text-2xl">
+                    <i class="fas fa-times"></i>
                 </button>
             </div>
             
-            <form id="addMediaForm" class="space-y-4">
+            <form id="addMediaForm" class="space-y-6">
                 <input type="hidden" id="addMediaTradeId">
                 
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-3">Select Media Type</label>
-                    <div class="flex items-center space-x-4">
-                        <label for="addImageUpload" class="flex items-center justify-center w-12 h-12 rounded-full bg-indigo-100 text-indigo-600 cursor-pointer hover:bg-indigo-200 transition">
-                            <i class="fas fa-image"></i>
+                    <label class="form-label">Select Media Type</label>
+                    <div class="flex items-center justify-center space-x-6">
+                        <label for="addImageUpload" class="media-upload-btn image">
+                            <i class="fas fa-image text-xl"></i>
                             <input type="file" id="addImageUpload" accept="image/*" class="hidden">
                         </label>
                         
-                        <button type="button" id="addVoiceRecordBtn" class="flex items-center justify-center w-12 h-12 rounded-full bg-amber-100 text-amber-600 cursor-pointer hover:bg-amber-200 transition">
-                            <i class="fas fa-microphone"></i>
+                        <button type="button" id="addVoiceRecordBtn" class="media-upload-btn voice">
+                            <i class="fas fa-microphone text-xl"></i>
                         </button>
                         
-                        <label for="addVideoUpload" class="flex items-center justify-center w-12 h-12 rounded-full bg-emerald-100 text-emerald-600 cursor-pointer hover:bg-emerald-200 transition">
-                            <i class="fas fa-video"></i>
+                        <label for="addVideoUpload" class="media-upload-btn video">
+                            <i class="fas fa-video text-xl"></i>
                             <input type="file" id="addVideoUpload" accept="video/*" class="hidden">
                         </label>
                     </div>
                 </div>
                 
-                <div id="addMediaPreviews" class="space-y-2">
+                <div id="addMediaPreviews" class="space-y-4">
                     <!-- Media previews will appear here -->
                 </div>
                 
-                                 <div class="flex justify-end space-x-3 pt-4">
-                     <button type="button" onclick="closeAddMediaModal()" class="px-4 py-2 text-gray-600 border border-gray-300 rounded-lg hover:bg-gray-50 transition">
-                         Cancel
-                     </button>
-                     <button type="submit" class="px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition">
-                         Add Media
-                     </button>
-                 </div>
+                <!-- Debug Section -->
+                <div class="mt-4 p-3 bg-gray-100 rounded-lg">
+                    <button type="button" onclick="debugMediaFiles()" class="text-sm text-gray-600 hover:text-gray-800">
+                        🔍 Debug: Check Media Files State
+                    </button>
+                    <div id="debugInfo" class="text-xs text-gray-500 mt-2 hidden">
+                        <!-- Debug info will appear here -->
+                    </div>
+                </div>
+                
+                <div class="flex justify-end space-x-4 pt-6">
+                    <button type="button" onclick="closeAddMediaModal()" class="btn-secondary">
+                        Cancel
+                    </button>
+                    <button type="submit" class="btn-success">
+                        Add Media
+                    </button>
+                </div>
             </form>
         </div>
     </div>
@@ -322,6 +876,13 @@
         const toggleAuth = document.getElementById('toggleAuth');
         const signOutBtn = document.getElementById('signOutBtn');
         const userEmail = document.getElementById('userEmail');
+        
+        // View toggle elements
+        const listViewBtn = document.getElementById('listViewBtn');
+        const gridViewBtn = document.getElementById('gridViewBtn');
+        
+        // View state
+        let currentView = 'list'; // 'list' or 'grid'
         
         // Media upload elements
         const imageUpload = document.getElementById('imageUpload');
@@ -350,6 +911,9 @@
             const today = new Date().toISOString().split('T')[0];
             document.getElementById('tradeDate').value = today;
             filterDate.value = '';
+            
+            // Initialize view toggle
+            switchToView('list');
             
             // Check if user is already authenticated
             const user = await supabaseService.getCurrentUser();
@@ -456,29 +1020,44 @@
                     
                     if (result.success) {
                         const newTrade = result.data;
+                        console.log('Trade created successfully:', newTrade);
                         
-                                                 // Upload media files if any
-                         if (mediaFiles.image) {
-                             const imageResult = await supabaseService.uploadFile(mediaFiles.image, newTrade.id, 'image');
-                             if (imageResult.success) {
-                                 await supabaseService.updateTrade(newTrade.id, { image_urls: [imageResult.url] });
-                             }
-                         }
-                         
-                         if (mediaFiles.voice) {
-                             const voiceResult = await supabaseService.uploadFile(mediaFiles.voice, newTrade.id, 'voice');
-                             if (voiceResult.success) {
-                                 await supabaseService.updateTrade(newTrade.id, { voice_urls: [voiceResult.url] });
-                             }
-                         }
-                         
-                         if (mediaFiles.video) {
-                             const videoResult = await supabaseService.uploadFile(mediaFiles.video, newTrade.id, 'video');
-                             if (videoResult.success) {
-                                 await supabaseService.updateTrade(newTrade.id, { video_urls: [videoResult.url] });
-                             }
-                         }
+                        // Upload media files if any
+                        let mediaUploadPromises = [];
                         
+                        if (mediaFiles.image) {
+                            console.log('Uploading image file:', mediaFiles.image);
+                            const imageResult = await supabaseService.uploadFile(mediaFiles.image, newTrade.id, 'image');
+                            if (imageResult.success) {
+                                await supabaseService.updateTrade(newTrade.id, { image_urls: [imageResult.url] });
+                                console.log('Image uploaded and trade updated');
+                            } else {
+                                console.error('Failed to upload image:', imageResult.error);
+                            }
+                        }
+                        
+                        if (mediaFiles.voice) {
+                            console.log('Uploading voice file:', mediaFiles.voice);
+                            const voiceResult = await supabaseService.uploadFile(mediaFiles.voice, newTrade.id, 'voice');
+                            if (voiceResult.success) {
+                                await supabaseService.updateTrade(newTrade.id, { voice_urls: [voiceResult.url] });
+                                console.log('Voice uploaded and trade updated');
+                            } else {
+                                console.error('Failed to upload voice:', voiceResult.error);
+                            }
+                        }
+                        
+                        if (mediaFiles.video) {
+                            console.log('Uploading video file:', mediaFiles.video);
+                            const videoResult = await supabaseService.uploadFile(mediaFiles.video, newTrade.id, 'video');
+                            if (videoResult.success) {
+                                await supabaseService.updateTrade(newTrade.id, { video_urls: [videoResult.url] });
+                                console.log('Video uploaded and trade updated');
+                            } else {
+                                console.error('Failed to upload video:', videoResult.error);
+                            }
+                        }
+                    
                         // Clear form
                         tradeForm.reset();
                         document.getElementById('tradeDate').value = new Date().toISOString().split('T')[0];
@@ -496,7 +1075,7 @@
                         
                         // Reload trades
                         await loadTrades();
-                        
+                    
                         // Show success message
                         alert('Trade saved successfully!');
                     } else {
@@ -518,6 +1097,10 @@
             searchInput.addEventListener('input', () => filterTrades());
             filterPnl.addEventListener('change', () => filterTrades());
             filterDate.addEventListener('change', () => filterTrades());
+            
+            // View toggle handlers
+            listViewBtn.addEventListener('click', () => switchToView('list'));
+            gridViewBtn.addEventListener('click', () => switchToView('grid'));
             
             // Edit trade form submission
             document.getElementById('editTradeForm').addEventListener('submit', async (e) => {
@@ -574,18 +1157,30 @@
                      let hasMedia = false;
                      
                      // Debug: Log the current state of addMediaFiles
+                     console.log('=== ADD MEDIA FORM SUBMISSION ===');
                      console.log('addMediaFiles state:', addMediaFiles);
                      console.log('addMediaFiles.image:', addMediaFiles.image);
                      console.log('addMediaFiles.voice:', addMediaFiles.voice);
                      console.log('addMediaFiles.video:', addMediaFiles.video);
+                     
+                     // Check if any media files exist
+                     if (addMediaFiles.image || addMediaFiles.voice || addMediaFiles.video) {
+                         hasMedia = true;
+                         console.log('Media files detected, proceeding with upload...');
+                     } else {
+                         console.log('No media files detected');
+                         alert('Please select at least one media file');
+                         return;
+                     }
                      
                      // Upload media files if any
                      if (addMediaFiles.image) {
                          console.log('Processing image file:', addMediaFiles.image);
                          const imageResult = await supabaseService.addMediaToTrade(tradeId, addMediaFiles.image, 'image');
                          console.log('Image upload result:', imageResult);
-                         if (imageResult.success) {
-                             hasMedia = true;
+                         if (!imageResult.success) {
+                             alert(`Failed to upload image: ${imageResult.error}`);
+                             return;
                          }
                      }
                      
@@ -593,8 +1188,9 @@
                          console.log('Processing voice file:', addMediaFiles.voice);
                          const voiceResult = await supabaseService.addMediaToTrade(tradeId, addMediaFiles.voice, 'voice');
                          console.log('Voice upload result:', voiceResult);
-                         if (voiceResult.success) {
-                             hasMedia = true;
+                         if (!voiceResult.success) {
+                             alert(`Failed to upload voice: ${voiceResult.error}`);
+                             return;
                          }
                      }
                      
@@ -602,20 +1198,18 @@
                          console.log('Processing video file:', addMediaFiles.video);
                          const videoResult = await supabaseService.addMediaToTrade(tradeId, addMediaFiles.video, 'video');
                          console.log('Video upload result:', videoResult);
-                         if (videoResult.success) {
-                             hasMedia = true;
+                         if (!videoResult.success) {
+                             alert(`Failed to upload video: ${videoResult.error}`);
+                             return;
                          }
                      }
                      
-                     console.log('Final hasMedia value:', hasMedia);
+                     console.log('All media uploaded successfully!');
                      
-                     if (hasMedia) {
-                         closeAddMediaModal();
-                         await loadTrades();
-                         alert('Media added successfully!');
-                     } else {
-                         alert('Please select at least one media file');
-                     }
+                     // Close modal and refresh
+                     closeAddMediaModal();
+                     await loadTrades();
+                     alert('Media added successfully!');
                      
                  } catch (error) {
                      console.error('Error adding media:', error);
@@ -721,6 +1315,9 @@
             console.log(`addMediaFiles.${type} set to:`, addMediaFiles[type]);
             console.log('Current addMediaFiles state:', addMediaFiles);
             
+            // Update button appearance to show file is selected
+            updateMediaButtonState(type, true);
+            
             // Create preview
             const reader = new FileReader();
             reader.onload = function(e) {
@@ -736,12 +1333,12 @@
                     previewElement = document.createElement('img');
                     previewElement.src = e.target.result;
                     previewElement.alt = 'Image preview';
-                    previewElement.className = 'w-full h-32 object-cover rounded-lg border border-gray-200';
+                    previewElement.className = 'w-full h-32 object-cover rounded-2xl border-2 border-gray-200';
                 } else if (type === 'video') {
                     previewElement = document.createElement('video');
                     previewElement.src = e.target.result;
                     previewElement.controls = true;
-                    previewElement.className = 'w-full h-32 object-cover rounded-lg border border-gray-200';
+                    previewElement.className = 'w-full h-32 object-cover rounded-2xl border-2 border-gray-200';
                 }
                 
                 previewElement.id = `add-${type}-preview`;
@@ -751,6 +1348,18 @@
             
             if (type === 'image' || type === 'video') {
                 reader.readAsDataURL(file);
+            }
+        }
+        
+        // Update media button appearance to show selection state
+        function updateMediaButtonState(type, isSelected) {
+            const button = document.getElementById(`add${type.charAt(0).toUpperCase() + type.slice(1)}Upload`).parentElement;
+            if (isSelected) {
+                button.classList.add('ring-2', 'ring-green-500', 'ring-offset-2');
+                button.style.transform = 'scale(1.05)';
+            } else {
+                button.classList.remove('ring-2', 'ring-green-500', 'ring-offset-2');
+                button.style.transform = 'scale(1)';
             }
         }
         
@@ -769,6 +1378,9 @@
                     addMediaRecorder.onstop = () => {
                         const audioBlob = new Blob(addAudioChunks, { type: 'audio/wav' });
                         addMediaFiles.voice = audioBlob;
+                        
+                        // Update button appearance to show file is selected
+                        updateMediaButtonState('voice', true);
                         
                         // Create audio preview
                         const audioUrl = URL.createObjectURL(audioBlob);
@@ -834,6 +1446,7 @@
             const file = event.target.files[0];
             if (!file) return;
             
+            console.log(`Main form: ${type} file selected:`, file);
             mediaFiles[type] = file;
             
             // Create preview
@@ -852,9 +1465,9 @@
                     previewElement.className = 'relative cursor-pointer';
                     previewElement.onclick = () => previewMedia('image', e.target.result, 'Image Preview');
                     previewElement.innerHTML = `
-                        <img src="${e.target.result}" alt="Image preview" class="media-preview w-full h-24 object-cover rounded-lg border border-gray-200">
-                        <div class="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center opacity-0 hover:opacity-100 transition rounded-lg">
-                            <i class="fas fa-expand text-white"></i>
+                        <img src="${e.target.result}" alt="Image preview" class="media-preview w-full h-24 object-cover rounded-2xl border-2 border-gray-200">
+                        <div class="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center opacity-0 hover:opacity-100 transition rounded-2xl">
+                            <i class="fas fa-expand text-white text-xl"></i>
                         </div>
                     `;
                 } else if (type === 'video') {
@@ -862,11 +1475,11 @@
                     previewElement.className = 'relative cursor-pointer';
                     previewElement.onclick = () => previewMedia('video', e.target.result, 'Video Preview');
                     previewElement.innerHTML = `
-                        <video controls class="media-preview w-full h-24 object-cover rounded-lg border border-gray-200" onclick="event.stopPropagation()">
+                        <video controls class="media-preview w-full h-24 object-cover rounded-2xl border-2 border-gray-200" onclick="event.stopPropagation()">
                             <source src="${e.target.result}" type="video/mp4">
                         </video>
-                        <div class="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center opacity-0 hover:opacity-100 transition rounded-lg pointer-events-none">
-                            <i class="fas fa-expand text-white"></i>
+                        <div class="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center opacity-0 hover:opacity-100 transition rounded-2xl pointer-events-none">
+                            <i class="fas fa-expand text-white text-xl"></i>
                         </div>
                     `;
                 }
@@ -943,14 +1556,40 @@
             renderTrades(filtered);
         }
         
+        function switchToView(view) {
+            currentView = view;
+            
+            // Update button states
+            if (view === 'list') {
+                listViewBtn.classList.add('active');
+                gridViewBtn.classList.remove('active');
+                tradeList.classList.remove('grid-view');
+                tradeList.classList.add('list-view');
+            } else {
+                gridViewBtn.classList.add('active');
+                listViewBtn.classList.remove('active');
+                tradeList.classList.remove('list-view');
+                tradeList.classList.add('grid-view');
+            }
+            
+            // Re-render trades with current view
+            filterTrades();
+        }
+        
         function renderTrades(trades) {
             tradeList.innerHTML = '';
             
+            // Apply current view class
+            tradeList.className = currentView === 'list' ? 'list-view' : 'grid-view';
+            
             if (trades.length === 0) {
                 tradeList.innerHTML = `
-                    <div class="text-center py-10 text-gray-500">
-                        <i class="fas fa-box-open text-4xl mb-2"></i>
-                        <p>No trades found</p>
+                    <div class="text-center py-20 text-gray-500">
+                        <div class="glass-effect rounded-3xl p-12 max-w-md mx-auto">
+                            <i class="fas fa-box-open text-6xl mb-6 text-gray-400"></i>
+                            <h3 class="text-2xl font-semibold text-gray-600 mb-2">No trades found</h3>
+                            <p class="text-gray-500">Start by logging your first trade above</p>
+                        </div>
                     </div>
                 `;
                 return;
@@ -958,10 +1597,10 @@
             
             trades.forEach((trade, index) => {
                 const tradeCard = document.createElement('div');
-                tradeCard.className = `bg-white rounded-xl shadow-md overflow-hidden card-hover fade-in`;
+                tradeCard.className = `trade-card fade-in`;
                 tradeCard.style.animationDelay = `${index * 0.1}s`;
                 
-                const pnlClass = trade.pnl >= 0 ? 'text-emerald-600' : 'text-red-600';
+                const pnlClass = trade.pnl >= 0 ? 'profit' : 'loss';
                 const pnlIcon = trade.pnl >= 0 ? 'fa-arrow-up' : 'fa-arrow-down';
                 
                 // Format date
@@ -972,53 +1611,55 @@
                 });
                 
                 tradeCard.innerHTML = `
-                    <div class="p-6">
-                        <div class="flex justify-between items-start mb-2">
+                    <div class="p-8">
+                        <div class="flex justify-between items-start mb-6">
                             <div>
-                                <h3 class="text-xl font-semibold text-gray-800">${trade.title}</h3>
-                                <div class="flex items-center mt-1 space-x-2 text-sm text-gray-600">
-                                    <span class="bg-indigo-100 text-indigo-800 px-2 py-1 rounded-full">
-                                        <i class="fas fa-chart-line mr-1"></i> ${trade.symbol}
+                                <h3 class="text-2xl font-semibold text-gray-800 mb-3">${trade.title}</h3>
+                                <div class="flex items-center space-x-3 text-sm">
+                                    <span class="symbol-badge">
+                                        <i class="fas fa-chart-line"></i> ${trade.symbol}
                                     </span>
-                                    <span><i class="far fa-calendar mr-1"></i> ${formattedDate}</span>
+                                    <span class="date-badge">
+                                        <i class="far fa-calendar mr-1"></i> ${formattedDate}
+                                    </span>
                                 </div>
                             </div>
                             <div class="text-right">
-                                <span class="text-sm text-gray-500">P&L</span>
-                                <div class="${pnlClass} font-bold">
-                                    <i class="fas ${pnlIcon} mr-1"></i> $${Math.abs(trade.pnl).toFixed(2)}
+                                <span class="text-sm text-gray-500 mb-2 block">P&L</span>
+                                <div class="${pnlClass} text-2xl">
+                                    <i class="fas ${pnlIcon} mr-2"></i> $${Math.abs(trade.pnl).toFixed(2)}
                                 </div>
                             </div>
                         </div>
                         
-                        ${trade.description ? `<p class="text-gray-600 mt-3 mb-4">${trade.description}</p>` : ''}
+                        ${trade.description ? `<p class="text-gray-600 mt-4 mb-6 text-lg leading-relaxed">${trade.description}</p>` : ''}
                         
-                        <div class="grid grid-cols-2 gap-4 mb-4">
-                            <div class="bg-gray-50 p-3 rounded-lg">
-                                <span class="text-sm text-gray-500">Entry</span>
-                                <div class="font-medium">$${trade.entry_price.toFixed(2)}</div>
+                        <div class="stats-grid">
+                            <div class="stat-card">
+                                <div class="stat-value">$${trade.entry_price.toFixed(2)}</div>
+                                <div class="stat-label">Entry Price</div>
                             </div>
-                            <div class="bg-gray-50 p-3 rounded-lg">
-                                <span class="text-sm text-gray-500">Exit</span>
-                                <div class="font-medium">$${trade.exit_price.toFixed(2)}</div>
+                            <div class="stat-card">
+                                <div class="stat-value">$${trade.exit_price.toFixed(2)}</div>
+                                <div class="stat-label">Exit Price</div>
                             </div>
                         </div>
                         
                         ${renderMediaSection(trade)}
                         
                         <!-- Edit and Add Media Buttons -->
-                        <div class="mt-4 flex justify-end space-x-2">
-                            <button onclick="addMediaToTrade('${trade.id}')" class="bg-emerald-600 text-white px-3 py-1 rounded-lg text-sm hover:bg-emerald-700 transition flex items-center space-x-1">
-                                <i class="fas fa-plus"></i>
-                                <span>Add Media</span>
+                        <div class="mt-8 flex justify-end space-x-3">
+                            <button onclick="addMediaToTrade('${trade.id}')" class="btn-success text-sm px-4 py-2">
+                                <i class="fas fa-plus mr-2"></i>
+                                Add Media
                             </button>
-                            <button onclick="editTrade('${trade.id}')" class="bg-indigo-600 text-white px-3 py-1 rounded-lg text-sm hover:bg-indigo-700 transition flex items-center space-x-1">
-                                <i class="fas fa-edit"></i>
-                                <span>Edit</span>
+                            <button onclick="editTrade('${trade.id}')" class="btn-primary text-sm px-4 py-2">
+                                <i class="fas fa-edit mr-2"></i>
+                                Edit
                             </button>
-                            <button onclick="deleteTrade('${trade.id}')" class="bg-red-600 text-white px-3 py-1 rounded-lg text-sm hover:bg-red-700 transition flex items-center space-x-1">
-                                <i class="fas fa-trash"></i>
-                                <span>Delete</span>
+                            <button onclick="deleteTrade('${trade.id}')" class="btn-danger text-sm px-4 py-2">
+                                <i class="fas fa-trash mr-2"></i>
+                                Delete
                             </button>
                         </div>
                     </div>
@@ -1031,36 +1672,36 @@
         function renderMediaSection(trade) {
             let mediaHtml = '';
             
-                         // Collect all media URLs
-             const mediaItems = [];
-             
-             // Handle new array-based schema
-             if (trade.image_urls && Array.isArray(trade.image_urls) && trade.image_urls.length > 0) {
-                 trade.image_urls.forEach(url => mediaItems.push({ type: 'image', url, title: trade.title }));
-             }
-             // Fallback for old single URL schema
-             else if (trade.image_url) {
-                 mediaItems.push({ type: 'image', url: trade.image_url, title: trade.title });
-             }
-             
-             if (trade.voice_urls && Array.isArray(trade.voice_urls) && trade.voice_urls.length > 0) {
-                 trade.voice_urls.forEach(url => mediaItems.push({ type: 'voice', url, title: trade.title }));
-             }
-             // Fallback for old single URL schema
-             else if (trade.voice_url) {
-                 mediaItems.push({ type: 'voice', url: trade.voice_url, title: trade.title });
-             }
-             
-             if (trade.video_urls && Array.isArray(trade.video_urls) && trade.video_urls.length > 0) {
-                 trade.video_urls.forEach(url => mediaItems.push({ type: 'video', url, title: trade.title }));
-             }
-             // Fallback for old single URL schema
-             else if (trade.video_url) {
-                 mediaItems.push({ type: 'video', url: trade.video_url, title: trade.title });
-             }
+            // Collect all media URLs
+            const mediaItems = [];
+            
+            // Handle new array-based schema
+            if (trade.image_urls && Array.isArray(trade.image_urls) && trade.image_urls.length > 0) {
+                trade.image_urls.forEach(url => mediaItems.push({ type: 'image', url, title: trade.title }));
+            }
+            // Fallback for old single URL schema
+            else if (trade.image_url) {
+                mediaItems.push({ type: 'image', url: trade.image_url, title: trade.title });
+            }
+            
+            if (trade.voice_urls && Array.isArray(trade.voice_urls) && trade.voice_urls.length > 0) {
+                trade.voice_urls.forEach(url => mediaItems.push({ type: 'voice', url, title: trade.title }));
+            }
+            // Fallback for old single URL schema
+            else if (trade.voice_url) {
+                mediaItems.push({ type: 'voice', url: trade.voice_url, title: trade.title });
+            }
+            
+            if (trade.video_urls && Array.isArray(trade.video_urls) && trade.video_urls.length > 0) {
+                trade.video_urls.forEach(url => mediaItems.push({ type: 'video', url, title: trade.title }));
+            }
+            // Fallback for old single URL schema
+            else if (trade.video_url) {
+                mediaItems.push({ type: 'video', url: trade.video_url, title: trade.title });
+            }
             
             if (mediaItems.length > 0) {
-                mediaHtml += '<div class="mt-4"><h4 class="text-sm font-medium text-gray-700 mb-3">Trade Media</h4>';
+                mediaHtml += '<div class="mt-8"><h4 class="text-xl font-semibold text-gray-800 mb-6">Trade Media</h4>';
                 
                 // Group media by type
                 const mediaGroups = {};
@@ -1080,14 +1721,14 @@
                         mediaHtml += renderSingleMediaItem(items[0]);
                     } else if (items.length === 2) {
                         // Two items - side by side
-                        mediaHtml += '<div class="flex space-x-3 mb-3">';
+                        mediaHtml += '<div class="flex space-x-6 mb-6">';
                         items.forEach(item => {
                             mediaHtml += `<div class="flex-1">${renderSingleMediaItem(item, true)}</div>`;
                         });
                         mediaHtml += '</div>';
                     } else {
                         // More than 2 items - horizontal scroll
-                        mediaHtml += '<div class="flex space-x-3 mb-3 overflow-x-auto pb-2">';
+                        mediaHtml += '<div class="flex space-x-6 mb-6 overflow-x-auto pb-4">';
                         items.forEach(item => {
                             mediaHtml += `<div class="flex-shrink-0 w-80">${renderSingleMediaItem(item, true)}</div>`;
                         });
@@ -1107,23 +1748,23 @@
             switch (item.type) {
                 case 'image':
                     return `
-                        <div class="relative group w-full cursor-pointer" onclick="previewMedia('image', '${item.url}', '${item.title}')">
-                            <img src="${item.url}" alt="Trade image" class="w-full ${height} object-cover rounded-lg border border-gray-200 media-preview">
-                            <div class="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition rounded-lg">
-                                <i class="fas fa-expand text-white text-2xl"></i>
+                        <div class="relative group w-full cursor-pointer media-item" onclick="previewMedia('image', '${item.url}', '${item.title}')">
+                            <img src="${item.url}" alt="Trade image" class="w-full ${height} object-cover rounded-2xl border-2 border-gray-200 media-preview">
+                            <div class="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition rounded-2xl">
+                                <i class="fas fa-expand text-white text-3xl"></i>
                             </div>
                         </div>
                     `;
                     
                 case 'voice':
                     return `
-                        <div class="bg-amber-50 p-4 rounded-lg border border-amber-100 w-full cursor-pointer" onclick="previewMedia('voice', '${item.url}', '${item.title}')">
-                            <div class="flex items-center justify-between mb-2">
-                                <div class="flex items-center space-x-2">
-                                    <i class="fas fa-microphone text-amber-600"></i>
-                                    <span class="text-sm font-medium text-amber-800">Voice Note</span>
+                        <div class="voice-note w-full cursor-pointer" onclick="previewMedia('voice', '${item.url}', '${item.title}')">
+                            <div class="flex items-center justify-between mb-4">
+                                <div class="flex items-center space-x-3">
+                                    <i class="fas fa-microphone text-2xl text-amber-600"></i>
+                                    <span class="text-lg font-semibold text-amber-800">Voice Note</span>
                                 </div>
-                                <i class="fas fa-expand text-amber-600 hover:text-amber-800 transition"></i>
+                                <i class="fas fa-expand text-amber-600 hover:text-amber-800 transition text-xl"></i>
                             </div>
                             <audio controls class="w-full" onclick="event.stopPropagation()">
                                 <source src="${item.url}" type="audio/wav">
@@ -1134,13 +1775,13 @@
                     
                 case 'video':
                     return `
-                        <div class="relative group w-full cursor-pointer" onclick="previewMedia('video', '${item.url}', '${item.title}')">
-                            <video controls class="w-full ${height} object-cover rounded-lg border border-gray-200 media-preview" onclick="event.stopPropagation()">
+                        <div class="relative group w-full cursor-pointer media-item" onclick="previewMedia('video', '${item.url}', '${item.title}')">
+                            <video controls class="w-full ${height} object-cover rounded-2xl border-2 border-gray-200 media-preview" onclick="event.stopPropagation()">
                                 <source src="${item.url}" type="video/mp4">
                                 Your browser does not support the video tag.
                             </video>
-                            <div class="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition rounded-lg pointer-events-none">
-                                <i class="fas fa-expand text-white text-2xl"></i>
+                            <div class="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition rounded-2xl pointer-events-none">
+                                <i class="fas fa-expand text-white text-3xl"></i>
                             </div>
                         </div>
                     `;
@@ -1196,12 +1837,15 @@
         // Add Media Functions
         function addMediaToTrade(tradeId) {
             console.log('addMediaToTrade called with tradeId:', tradeId);
-            console.log('addMediaFiles before opening modal:', addMediaFiles);
+            
+            // Reset addMediaFiles when opening modal
+            addMediaFiles = { image: null, voice: null, video: null };
+            console.log('addMediaFiles reset when opening modal:', addMediaFiles);
             
             document.getElementById('addMediaTradeId').value = tradeId;
             document.getElementById('addMediaModal').classList.remove('hidden');
             
-            // Don't reset media files when opening modal - only reset previews
+            // Reset previews
             document.getElementById('addMediaPreviews').innerHTML = '';
             
             // Reset voice recording button
@@ -1209,6 +1853,14 @@
             addVoiceRecordBtn.innerHTML = '<i class="fas fa-microphone"></i>';
             addVoiceRecordBtn.classList.remove('bg-red-100', 'text-red-600', 'hover:bg-red-200');
             addVoiceRecordBtn.classList.add('bg-amber-100', 'text-amber-600', 'hover:bg-amber-200');
+            
+            // Reset button selection states
+            updateMediaButtonState('image', false);
+            updateMediaButtonState('voice', false);
+            updateMediaButtonState('video', false);
+            
+            // Hide debug info
+            document.getElementById('debugInfo').classList.add('hidden');
         }
         
         function closeAddMediaModal() {
@@ -1216,9 +1868,8 @@
             document.getElementById('addMediaForm').reset();
             document.getElementById('addMediaPreviews').innerHTML = '';
             
-            // Reset media files when closing modal
-            addMediaFiles = { image: null, voice: null, video: null };
-            console.log('addMediaFiles reset when closing modal:', addMediaFiles);
+            // Don't reset media files when closing - they might be needed for form submission
+            console.log('addMediaFiles kept when closing modal:', addMediaFiles);
             
             // Stop recording if active
             if (addMediaRecorder && addMediaRecorder.state !== 'inactive') {
@@ -1243,8 +1894,8 @@
                 case 'image':
                     mediaHtml = `
                         <div class="text-center">
-                            <h3 class="text-white text-xl font-semibold mb-4">${title}</h3>
-                            <img src="${url}" alt="${title}" class="max-w-full max-h-[80vh] object-contain rounded-lg shadow-2xl">
+                            <h3 class="text-white text-3xl font-bold mb-8">${title}</h3>
+                            <img src="${url}" alt="${title}" class="max-w-full max-h-[80vh] object-contain rounded-3xl shadow-2xl border-4 border-white">
                         </div>
                     `;
                     break;
@@ -1252,8 +1903,8 @@
                 case 'video':
                     mediaHtml = `
                         <div class="text-center">
-                            <h3 class="text-white text-xl font-semibold mb-4">${title}</h3>
-                            <video controls class="max-w-full max-h-[80vh] rounded-lg shadow-2xl">
+                            <h3 class="text-white text-3xl font-bold mb-8">${title}</h3>
+                            <video controls class="max-w-full max-h-[80vh] rounded-3xl shadow-2xl border-4 border-white">
                                 <source src="${url}" type="video/mp4">
                                 Your browser does not support the video tag.
                             </video>
@@ -1263,10 +1914,10 @@
                     
                 case 'voice':
                     mediaHtml = `
-                        <div class="text-center bg-white rounded-lg p-8 max-w-md mx-auto">
-                            <h3 class="text-gray-800 text-xl font-semibold mb-4">${title}</h3>
-                            <div class="flex items-center justify-center mb-4">
-                                <i class="fas fa-microphone text-amber-600 text-4xl"></i>
+                        <div class="text-center glass-effect rounded-3xl p-12 max-w-lg mx-auto shadow-2xl">
+                            <h3 class="text-gray-800 text-3xl font-bold mb-8">${title}</h3>
+                            <div class="flex items-center justify-center mb-8">
+                                <i class="fas fa-microphone text-amber-600 text-6xl"></i>
                             </div>
                             <audio controls class="w-full">
                                 <source src="${url}" type="audio/wav">
@@ -1290,6 +1941,23 @@
             
             // Remove keyboard event listener
             document.removeEventListener('keydown', handlePreviewKeydown);
+        }
+        
+        // Debug function for media files
+        function debugMediaFiles() {
+            const debugInfo = document.getElementById('debugInfo');
+            const info = `
+                <strong>Current Media Files State:</strong><br>
+                Image: ${addMediaFiles.image ? '✅ Selected (' + addMediaFiles.image.name + ')' : '❌ None'}<br>
+                Voice: ${addMediaFiles.voice ? '✅ Selected (' + addMediaFiles.voice.type + ')' : '❌ None'}<br>
+                Video: ${addMediaFiles.video ? '✅ Selected (' + addMediaFiles.video.name + ')' : '❌ None'}<br>
+                <br>
+                <strong>Object Details:</strong><br>
+                ${JSON.stringify(addMediaFiles, null, 2)}
+            `;
+            
+            debugInfo.innerHTML = info;
+            debugInfo.classList.remove('hidden');
         }
         
         function handlePreviewKeydown(event) {
