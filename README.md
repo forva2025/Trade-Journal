@@ -2,6 +2,11 @@
 
 A web-based application to help you track your trading performance with detailed, multimedia-rich notes.
 
+![Trade Journal Application](trade%20journal.png)
+
+*Screenshot showing the Trade Journal interface with trade cards, media uploads, and modern UI design*
+
+
 ## Features
 
 *   **Log New Trades:** Easily record new trades with the following details:
