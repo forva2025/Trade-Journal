@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Trade Journal</title>
+    <link rel="icon" href="favicon.jpg" type="image/jpeg">
+    <link rel="shortcut icon" href="favicon.jpg" type="image/jpeg">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -234,17 +236,17 @@
         
         .trade-card {
             background: white;
-            border-radius: 20px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
             overflow: hidden;
-            transition: all 0.3s ease;
-            border: 1px solid #f3f4f6;
+            transition: all 0.2s ease;
+            border: 1px solid #f1f5f9;
         }
         
         .trade-card:hover {
-            transform: translateY(-8px);
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
-            border-color: #e0e7ff;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+            border-color: #e2e8f0;
         }
         
         .modal-overlay {
@@ -357,10 +359,10 @@
         }
         
         .voice-note {
-            background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
-            padding: 20px;
-            border-radius: 16px;
-            border: 1px solid #fbbf24;
+            background: #fef3c7;
+            padding: 8px;
+            border-radius: 8px;
+            border: 1px solid #fde68a;
         }
         
         .profit {
@@ -374,24 +376,33 @@
         }
         
         .symbol-badge {
-            background: linear-gradient(135deg, #e0e7ff 0%, #c7d2fe 100%);
+            background: #e0e7ff;
             color: #4f46e5;
-            padding: 6px 12px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: 600;
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 10px;
+            font-weight: 500;
             display: inline-flex;
             align-items: center;
-            gap: 6px;
+            gap: 4px;
         }
         
         .date-badge {
-            background: #f3f4f6;
-            color: #6b7280;
-            padding: 6px 12px;
-            border-radius: 20px;
-            font-size: 12px;
+            background: #f1f5f9;
+            color: #64748b;
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 10px;
+            font-weight: 400;
+        }
+        
+        .direction-badge {
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 10px;
             font-weight: 500;
+            display: inline-flex;
+            align-items: center;
         }
         
         /* Responsive design */
@@ -496,6 +507,33 @@
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
         }
         
+        /* Line clamp for descriptions */
+        .line-clamp-2 {
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+        
+        /* Password toggle button */
+        #togglePassword {
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 4px;
+            border-radius: 4px;
+            transition: all 0.2s ease;
+        }
+        
+        #togglePassword:hover {
+            background-color: rgba(0, 0, 0, 0.05);
+        }
+        
+        #togglePassword:focus {
+            outline: none;
+            background-color: rgba(0, 0, 0, 0.1);
+        }
+        
         /* View Toggle Styles */
         .view-toggle-btn {
             color: #6b7280;
@@ -598,7 +636,12 @@
                         </div>
                         <div>
                             <label for="password" class="form-label">Password</label>
-                            <input type="password" id="password" required class="form-input">
+                            <div class="relative">
+                                <input type="password" id="password" required class="form-input pr-12">
+                                <button type="button" id="togglePassword" class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700 transition-colors">
+                                    <i class="fas fa-eye" id="passwordIcon"></i>
+                                </button>
+                            </div>
                         </div>
                         <button type="submit" class="btn-primary w-full">
                             Sign In
@@ -647,8 +690,27 @@
                         
                         <div class="grid grid-cols-2 gap-4">
                             <div>
+                                <label for="tradeDirection" class="form-label">Trade Direction*</label>
+                                <select id="tradeDirection" required class="form-input">
+                                    <option value="">Select Direction</option>
+                                    <option value="buy">Buy (Long)</option>
+                                    <option value="sell">Sell (Short)</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label for="tradeDate" class="form-label">Trade Date</label>
+                                <input type="date" id="tradeDate" class="form-input">
+                            </div>
+                        </div>
+                        
+                        <div class="grid grid-cols-3 gap-4">
+                        <div>
                                 <label for="entryPrice" class="form-label">Entry Price*</label>
                                 <input type="number" step="0.01" id="entryPrice" required class="form-input">
+                            </div>
+                            <div>
+                                <label for="targetPrice" class="form-label">Target Price</label>
+                                <input type="number" step="0.01" id="targetPrice" class="form-input">
                             </div>
                             <div>
                                 <label for="exitPrice" class="form-label">Exit Price*</label>
@@ -656,7 +718,7 @@
                             </div>
                         </div>
                         
-                        <div>
+                            <div>
                             <label for="tradeDate" class="form-label">Trade Date</label>
                             <input type="date" id="tradeDate" class="form-input">
                         </div>
@@ -667,17 +729,17 @@
                             <div class="flex items-center justify-center space-x-6">
                                 <label for="imageUpload" class="media-upload-btn image">
                                     <i class="fas fa-image text-xl"></i>
-                                    <input type="file" id="imageUpload" accept="image/*" class="hidden">
-                                </label>
-                                
+                                        <input type="file" id="imageUpload" accept="image/*" class="hidden">
+                                    </label>
+                                    
                                 <button type="button" id="voiceRecordBtn" class="media-upload-btn voice">
                                     <i class="fas fa-microphone text-xl"></i>
                                 </button>
                                 
                                 <label for="videoUpload" class="media-upload-btn video">
                                     <i class="fas fa-video text-xl"></i>
-                                    <input type="file" id="videoUpload" accept="video/*" class="hidden">
-                                </label>
+                                        <input type="file" id="videoUpload" accept="video/*" class="hidden">
+                                    </label>
                             </div>
                             
                             <div id="mediaPreviews" class="grid grid-cols-3 gap-3">
@@ -698,20 +760,20 @@
                 <div class="search-container">
                     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                         <h2 class="text-3xl font-semibold text-gray-800">Your Trades</h2>
-                        
+                    
                         <div class="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
                             <input type="text" id="searchInput" placeholder="Search by symbol..." class="search-input w-full sm:w-64">
-                            
+                        
                             <select id="filterPnl" class="filter-select w-full sm:w-auto">
-                                <option value="all">All P&L</option>
-                                <option value="profit">Profit</option>
-                                <option value="loss">Loss</option>
-                            </select>
-                            
+                            <option value="all">All P&L</option>
+                            <option value="profit">Profit</option>
+                            <option value="loss">Loss</option>
+                        </select>
+                        
                             <input type="date" id="filterDate" class="filter-select w-full sm:w-auto">
-                        </div>
                     </div>
-                    
+                </div>
+                
                     <!-- View Toggle -->
                     <div class="flex items-center justify-center mt-6">
                         <div class="bg-gray-100 rounded-2xl p-1 flex">
@@ -759,23 +821,36 @@
                 
                 <div>
                     <label for="editSymbol" class="form-label">Symbol*</label>
-                    <input type="text" id="editSymbol" required class="form-input">
+                    <input type="input" id="editSymbol" required class="form-input">
                 </div>
                 
                 <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label for="editTradeDirection" class="form-label">Trade Direction*</label>
+                        <select id="editTradeDirection" required class="form-input">
+                            <option value="buy">Buy (Long)</option>
+                            <option value="sell">Sell (Short)</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="editTradeDate" class="form-label">Trade Date</label>
+                        <input type="date" id="editTradeDate" class="form-input">
+                    </div>
+                </div>
+                
+                <div class="grid grid-cols-3 gap-4">
                     <div>
                         <label for="editEntryPrice" class="form-label">Entry Price*</label>
                         <input type="number" step="0.01" id="editEntryPrice" required class="form-input">
                     </div>
                     <div>
+                        <label for="editTargetPrice" class="form-label">Target Price</label>
+                        <input type="number" step="0.01" id="editTargetPrice" class="form-input">
+                    </div>
+                    <div>
                         <label for="editExitPrice" class="form-label">Exit Price*</label>
                         <input type="number" step="0.01" id="editExitPrice" required class="form-input">
                     </div>
-                </div>
-                
-                <div>
-                    <label for="editTradeDate" class="form-label">Trade Date</label>
-                    <input type="date" id="editTradeDate" class="form-input">
                 </div>
                 
                 <div class="flex justify-end space-x-4 pt-6">
@@ -876,6 +951,11 @@
         const toggleAuth = document.getElementById('toggleAuth');
         const signOutBtn = document.getElementById('signOutBtn');
         const userEmail = document.getElementById('userEmail');
+        
+        // Password toggle elements
+        const togglePassword = document.getElementById('togglePassword');
+        const passwordInput = document.getElementById('password');
+        const passwordIcon = document.getElementById('passwordIcon');
         
         // View toggle elements
         const listViewBtn = document.getElementById('listViewBtn');
@@ -993,13 +1073,29 @@
                     const title = document.getElementById('title').value;
                     const description = document.getElementById('description').value;
                     const symbol = document.getElementById('symbol').value.toUpperCase();
+                    const tradeDirection = document.getElementById('tradeDirection').value;
                     const entryPrice = parseFloat(document.getElementById('entryPrice').value);
+                    const targetPrice = document.getElementById('targetPrice').value ? parseFloat(document.getElementById('targetPrice').value) : null;
                     const exitPrice = parseFloat(document.getElementById('exitPrice').value);
                     const tradeDate = document.getElementById('tradeDate').value || new Date().toISOString().split('T')[0];
-                    const pnl = exitPrice - entryPrice;
+                    
+                    // Calculate P&L based on trade direction
+                    let pnl, pnlPercentage;
+                    if (tradeDirection === 'buy') {
+                        // Long position: profit when exit > entry
+                        pnl = exitPrice - entryPrice;
+                        pnlPercentage = ((exitPrice - entryPrice) / entryPrice) * 100;
+                    } else if (tradeDirection === 'sell') {
+                        // Short position: profit when exit < entry
+                        pnl = entryPrice - exitPrice;
+                        pnlPercentage = ((entryPrice - exitPrice) / entryPrice) * 100;
+                    } else {
+                        alert('Please select trade direction');
+                        return;
+                    }
                     
                     // Validate required fields
-                    if (!title || !symbol || isNaN(entryPrice) || isNaN(exitPrice)) {
+                    if (!title || !symbol || !tradeDirection || isNaN(entryPrice) || isNaN(exitPrice)) {
                         alert('Please fill in all required fields');
                         return;
                     }
@@ -1009,9 +1105,12 @@
                         title,
                         description,
                         symbol,
+                        trade_direction: tradeDirection,
                         entry_price: entryPrice,
+                        target_price: targetPrice,
                         exit_price: exitPrice,
                         pnl,
+                        pnl_percentage: pnlPercentage,
                         trade_date: tradeDate
                     };
                     
@@ -1058,12 +1157,12 @@
                             }
                         }
                     
-                        // Clear form
-                        tradeForm.reset();
+                    // Clear form
+                    tradeForm.reset();
                         document.getElementById('tradeDate').value = new Date().toISOString().split('T')[0];
-                        mediaPreviews.innerHTML = '';
-                        mediaFiles = { image: null, voice: null, video: null };
-                        
+                    mediaPreviews.innerHTML = '';
+                    mediaFiles = { image: null, voice: null, video: null };
+                    
                         // Reset voice recording button
                         if (isRecording && mediaRecorder && mediaRecorder.state !== 'inactive') {
                             mediaRecorder.stop();
@@ -1076,8 +1175,8 @@
                         // Reload trades
                         await loadTrades();
                     
-                        // Show success message
-                        alert('Trade saved successfully!');
+                    // Show success message
+                    alert('Trade saved successfully!');
                     } else {
                         alert(result.error);
                     }
@@ -1102,6 +1201,9 @@
             listViewBtn.addEventListener('click', () => switchToView('list'));
             gridViewBtn.addEventListener('click', () => switchToView('grid'));
             
+            // Password toggle handler
+            togglePassword.addEventListener('click', togglePasswordVisibility);
+            
             // Edit trade form submission
             document.getElementById('editTradeForm').addEventListener('submit', async (e) => {
                 e.preventDefault();
@@ -1111,13 +1213,29 @@
                     const title = document.getElementById('editTitle').value;
                     const description = document.getElementById('editDescription').value;
                     const symbol = document.getElementById('editSymbol').value.toUpperCase();
+                    const tradeDirection = document.getElementById('editTradeDirection').value;
                     const entryPrice = parseFloat(document.getElementById('editEntryPrice').value);
+                    const targetPrice = document.getElementById('editTargetPrice').value ? parseFloat(document.getElementById('editTargetPrice').value) : null;
                     const exitPrice = parseFloat(document.getElementById('editExitPrice').value);
                     const tradeDate = document.getElementById('editTradeDate').value;
-                    const pnl = exitPrice - entryPrice;
+                    
+                    // Calculate P&L based on trade direction
+                    let pnl, pnlPercentage;
+                    if (tradeDirection === 'buy') {
+                        // Long position: profit when exit > entry
+                        pnl = exitPrice - entryPrice;
+                        pnlPercentage = ((exitPrice - entryPrice) / entryPrice) * 100;
+                    } else if (tradeDirection === 'sell') {
+                        // Short position: profit when exit < entry
+                        pnl = entryPrice - exitPrice;
+                        pnlPercentage = ((entryPrice - exitPrice) / entryPrice) * 100;
+                    } else {
+                        alert('Please select trade direction');
+                        return;
+                    }
                     
                     // Validate required fields
-                    if (!title || !symbol || isNaN(entryPrice) || isNaN(exitPrice)) {
+                    if (!title || !symbol || !tradeDirection || isNaN(entryPrice) || isNaN(exitPrice)) {
                         alert('Please fill in all required fields');
                         return;
                     }
@@ -1126,9 +1244,12 @@
                         title,
                         description,
                         symbol,
+                        trade_direction: tradeDirection,
                         entry_price: entryPrice,
+                        target_price: targetPrice,
                         exit_price: exitPrice,
                         pnl,
+                        pnl_percentage: pnlPercentage,
                         trade_date: tradeDate
                     };
                     
@@ -1600,8 +1721,10 @@
                 tradeCard.className = `trade-card fade-in`;
                 tradeCard.style.animationDelay = `${index * 0.1}s`;
                 
-                const pnlClass = trade.pnl >= 0 ? 'profit' : 'loss';
-                const pnlIcon = trade.pnl >= 0 ? 'fa-arrow-up' : 'fa-arrow-down';
+                // Handle P&L display for both old and new trade formats
+                const pnl = trade.pnl || 0;
+                const pnlClass = pnl >= 0 ? 'profit' : 'loss';
+                const pnlIcon = pnl >= 0 ? 'fa-arrow-up' : 'fa-arrow-down';
                 
                 // Format date
                 const formattedDate = new Date(trade.trade_date).toLocaleDateString('en-US', {
@@ -1611,54 +1734,62 @@
                 });
                 
                 tradeCard.innerHTML = `
-                    <div class="p-8">
-                        <div class="flex justify-between items-start mb-6">
+                    <div class="p-4">
+                        <div class="flex justify-between items-start mb-3">
                             <div>
-                                <h3 class="text-2xl font-semibold text-gray-800 mb-3">${trade.title}</h3>
-                                <div class="flex items-center space-x-3 text-sm">
+                                <h3 class="text-lg font-semibold text-gray-800 mb-1">${trade.title}</h3>
+                                <div class="flex items-center space-x-2 text-xs">
                                     <span class="symbol-badge">
                                         <i class="fas fa-chart-line"></i> ${trade.symbol}
                                     </span>
                                     <span class="date-badge">
                                         <i class="far fa-calendar mr-1"></i> ${formattedDate}
                                     </span>
+                                    ${trade.trade_direction ? `<span class="direction-badge ${trade.trade_direction === 'buy' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}">
+                                        <i class="fas ${trade.trade_direction === 'buy' ? 'fa-arrow-up' : 'fa-arrow-down'} mr-1"></i>
+                                        ${trade.trade_direction === 'buy' ? 'Long' : 'Short'}
+                                    </span>` : ''}
                                 </div>
                             </div>
                             <div class="text-right">
-                                <span class="text-sm text-gray-500 mb-2 block">P&L</span>
-                                <div class="${pnlClass} text-2xl">
-                                    <i class="fas ${pnlIcon} mr-2"></i> $${Math.abs(trade.pnl).toFixed(2)}
+                                <div class="${pnlClass} text-lg font-semibold">
+                                    <i class="fas ${pnlIcon} mr-1"></i> $${Math.abs(pnl).toFixed(2)}
                                 </div>
+                                ${trade.pnl_percentage ? `<div class="text-xs ${pnlClass}">${trade.pnl_percentage > 0 ? '+' : ''}${trade.pnl_percentage.toFixed(2)}%</div>` : ''}
                             </div>
                         </div>
                         
-                        ${trade.description ? `<p class="text-gray-600 mt-4 mb-6 text-lg leading-relaxed">${trade.description}</p>` : ''}
+                        ${trade.description ? `<p class="text-gray-600 text-sm mb-3 line-clamp-2">${trade.description}</p>` : ''}
                         
-                        <div class="stats-grid">
-                            <div class="stat-card">
-                                <div class="stat-value">$${trade.entry_price.toFixed(2)}</div>
-                                <div class="stat-label">Entry Price</div>
+                        <div class="grid grid-cols-3 gap-2 mb-3 text-xs">
+                            <div class="text-center">
+                                <div class="text-gray-500">Entry</div>
+                                <div class="font-medium">$${trade.entry_price.toFixed(2)}</div>
                             </div>
-                            <div class="stat-card">
-                                <div class="stat-value">$${trade.exit_price.toFixed(2)}</div>
-                                <div class="stat-label">Exit Price</div>
+                            ${trade.target_price ? `<div class="text-center">
+                                <div class="text-gray-500">Target</div>
+                                <div class="font-medium text-blue-600">$${trade.target_price.toFixed(2)}</div>
+                            </div>` : '<div></div>'}
+                            <div class="text-center">
+                                <div class="text-gray-500">Exit</div>
+                                <div class="font-medium">$${trade.exit_price.toFixed(2)}</div>
                             </div>
                         </div>
                         
                         ${renderMediaSection(trade)}
                         
                         <!-- Edit and Add Media Buttons -->
-                        <div class="mt-8 flex justify-end space-x-3">
-                            <button onclick="addMediaToTrade('${trade.id}')" class="btn-success text-sm px-4 py-2">
-                                <i class="fas fa-plus mr-2"></i>
-                                Add Media
+                        <div class="flex justify-end space-x-2 pt-2 border-t border-gray-100">
+                            <button onclick="addMediaToTrade('${trade.id}')" class="btn-success text-xs px-2 py-1">
+                                <i class="fas fa-plus mr-1"></i>
+                                Add
                             </button>
-                            <button onclick="editTrade('${trade.id}')" class="btn-primary text-sm px-4 py-2">
-                                <i class="fas fa-edit mr-2"></i>
+                            <button onclick="editTrade('${trade.id}')" class="btn-primary text-xs px-2 py-1">
+                                <i class="fas fa-edit mr-1"></i>
                                 Edit
                             </button>
-                            <button onclick="deleteTrade('${trade.id}')" class="btn-danger text-sm px-4 py-2">
-                                <i class="fas fa-trash mr-2"></i>
+                            <button onclick="deleteTrade('${trade.id}')" class="btn-danger text-xs px-2 py-1">
+                                <i class="fas fa-trash mr-1"></i>
                                 Delete
                             </button>
                         </div>
@@ -1701,7 +1832,7 @@
             }
             
             if (mediaItems.length > 0) {
-                mediaHtml += '<div class="mt-8"><h4 class="text-xl font-semibold text-gray-800 mb-6">Trade Media</h4>';
+                mediaHtml += '<div class="mt-3"><h4 class="text-sm font-medium text-gray-700 mb-2">Media</h4>';
                 
                 // Group media by type
                 const mediaGroups = {};
@@ -1717,20 +1848,20 @@
                     const items = mediaGroups[mediaType];
                     
                     if (items.length === 1) {
-                        // Single item - full width
+                        // Single item - compact
                         mediaHtml += renderSingleMediaItem(items[0]);
                     } else if (items.length === 2) {
                         // Two items - side by side
-                        mediaHtml += '<div class="flex space-x-6 mb-6">';
+                        mediaHtml += '<div class="flex space-x-2 mb-2">';
                         items.forEach(item => {
                             mediaHtml += `<div class="flex-1">${renderSingleMediaItem(item, true)}</div>`;
                         });
                         mediaHtml += '</div>';
                     } else {
                         // More than 2 items - horizontal scroll
-                        mediaHtml += '<div class="flex space-x-6 mb-6 overflow-x-auto pb-4">';
+                        mediaHtml += '<div class="flex space-x-2 mb-2 overflow-x-auto pb-1">';
                         items.forEach(item => {
-                            mediaHtml += `<div class="flex-shrink-0 w-80">${renderSingleMediaItem(item, true)}</div>`;
+                            mediaHtml += `<div class="flex-shrink-0 w-32">${renderSingleMediaItem(item, true)}</div>`;
                         });
                         mediaHtml += '</div>';
                     }
@@ -1743,30 +1874,30 @@
         }
         
         function renderSingleMediaItem(item, isCompact = false) {
-            const height = isCompact ? 'h-48' : 'h-64';
+            const height = isCompact ? 'h-20' : 'h-32';
             
             switch (item.type) {
                 case 'image':
                     return `
                         <div class="relative group w-full cursor-pointer media-item" onclick="previewMedia('image', '${item.url}', '${item.title}')">
-                            <img src="${item.url}" alt="Trade image" class="w-full ${height} object-cover rounded-2xl border-2 border-gray-200 media-preview">
-                            <div class="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition rounded-2xl">
-                                <i class="fas fa-expand text-white text-3xl"></i>
+                            <img src="${item.url}" alt="Trade image" class="w-full ${height} object-cover rounded-lg border border-gray-200 media-preview">
+                            <div class="absolute inset-0 bg-black bg-opacity-30 flex items-center justify-center opacity-0 group-hover:opacity-100 transition rounded-lg">
+                                <i class="fas fa-expand text-white text-sm"></i>
                             </div>
                         </div>
                     `;
                     
                 case 'voice':
                     return `
-                        <div class="voice-note w-full cursor-pointer" onclick="previewMedia('voice', '${item.url}', '${item.title}')">
-                            <div class="flex items-center justify-between mb-4">
-                                <div class="flex items-center space-x-3">
-                                    <i class="fas fa-microphone text-2xl text-amber-600"></i>
-                                    <span class="text-lg font-semibold text-amber-800">Voice Note</span>
+                        <div class="voice-note w-full cursor-pointer p-2" onclick="previewMedia('voice', '${item.url}', '${item.title}')">
+                            <div class="flex items-center justify-between mb-1">
+                                <div class="flex items-center space-x-2">
+                                    <i class="fas fa-microphone text-sm text-amber-600"></i>
+                                    <span class="text-xs font-medium text-amber-800">Voice</span>
                                 </div>
-                                <i class="fas fa-expand text-amber-600 hover:text-amber-800 transition text-xl"></i>
+                                <i class="fas fa-expand text-amber-600 hover:text-amber-800 transition text-xs"></i>
                             </div>
-                            <audio controls class="w-full" onclick="event.stopPropagation()">
+                            <audio controls class="w-full h-8" onclick="event.stopPropagation()">
                                 <source src="${item.url}" type="audio/wav">
                                 Your browser does not support the audio element.
                             </audio>
@@ -1776,12 +1907,12 @@
                 case 'video':
                     return `
                         <div class="relative group w-full cursor-pointer media-item" onclick="previewMedia('video', '${item.url}', '${item.title}')">
-                            <video controls class="w-full ${height} object-cover rounded-2xl border-2 border-gray-200 media-preview" onclick="event.stopPropagation()">
+                            <video controls class="w-full ${height} object-cover rounded-lg border border-gray-200 media-preview" onclick="event.stopPropagation()">
                                 <source src="${item.url}" type="video/mp4">
                                 Your browser does not support the video tag.
                             </video>
-                            <div class="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition rounded-2xl pointer-events-none">
-                                <i class="fas fa-expand text-white text-3xl"></i>
+                            <div class="absolute inset-0 bg-black bg-opacity-30 flex items-center justify-center opacity-0 group-hover:opacity-100 transition rounded-lg pointer-events-none">
+                                <i class="fas fa-expand text-white text-sm"></i>
                             </div>
                         </div>
                     `;
@@ -1801,7 +1932,9 @@
             document.getElementById('editTitle').value = trade.title;
             document.getElementById('editDescription').value = trade.description || '';
             document.getElementById('editSymbol').value = trade.symbol;
+            document.getElementById('editTradeDirection').value = trade.trade_direction || 'buy';
             document.getElementById('editEntryPrice').value = trade.entry_price;
+            document.getElementById('editTargetPrice').value = trade.target_price || '';
             document.getElementById('editExitPrice').value = trade.exit_price;
             document.getElementById('editTradeDate').value = trade.trade_date;
             
@@ -1958,6 +2091,23 @@
             
             debugInfo.innerHTML = info;
             debugInfo.classList.remove('hidden');
+        }
+        
+        // Password toggle function
+        function togglePasswordVisibility() {
+            const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+            passwordInput.setAttribute('type', type);
+            
+            // Update icon
+            if (type === 'text') {
+                passwordIcon.classList.remove('fa-eye');
+                passwordIcon.classList.add('fa-eye-slash');
+                passwordIcon.title = 'Hide password';
+            } else {
+                passwordIcon.classList.remove('fa-eye-slash');
+                passwordIcon.classList.add('fa-eye');
+                passwordIcon.title = 'Show password';
+            }
         }
         
         function handlePreviewKeydown(event) {
